@@ -192,7 +192,7 @@ function checkAnswer() {
             if (activeQuestionIndex < lesson.questions.length) {
                 showCurrentQuestion();
             } else {
-                finishLesson();
+                showSessionComplete();
             }
         }, 1100);
     } else {
@@ -206,22 +206,54 @@ function checkAnswer() {
             if (activeQuestionIndex < lesson.questions.length) {
                 showCurrentQuestion();
             } else {
-                finishLesson();
+                showSessionComplete();
             }
         }, 1800);
     }
 }
 
+function showSessionComplete() {
+    const lesson = LESSONS[activeLessonIndex];
+
+    document.getElementById('questionTitle').textContent = '🎉 Session Complete!';
+
+    document.getElementById('questionText').innerHTML = `
+        <div class="completion-screen">
+            <div class="trophy">🏆</div>
+            <h3 class="completion-title">${lesson.title}</h3>
+            <p class="completion-subtitle">¡Muy bien! You finished the lesson.</p>
+        </div>
+    `;
+
+    // Clear answers and feedback
+    document.getElementById('answersContainer').innerHTML = '';
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('feedback').className = 'feedback';
+
+    // Swap Submit button for Finish Session button
+    const submitBtn = document.querySelector('.submit-btn');
+    submitBtn.textContent = 'Finish Session';
+    submitBtn.onclick = finishLesson;
+    submitBtn.classList.add('finish-btn');
+}
+
 function finishLesson() {
-    closeQuestion();
+    // Reset submit button back to its default behaviour
+    const submitBtn = document.querySelector('.submit-btn');
+    submitBtn.textContent = 'Submit Answer';
+    submitBtn.onclick = checkAnswer;
+    submitBtn.classList.remove('finish-btn');
+
     const btn = document.querySelector(`[data-index="${activeLessonIndex}"]`);
     btn.classList.add('completed');
     completedCount++;
     nextButtonIndex++;
     updateProgress();
 
+    closeQuestion();
+
     if (completedCount === LESSONS.length) {
-        setTimeout(() => alert('🏆 Unit Complete! ¡Muy bien!'), 200);
+        setTimeout(() => alert('🏆 Unit Complete! ¡Muy bien!'), 300);
     }
 }
 
