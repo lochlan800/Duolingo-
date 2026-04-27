@@ -10,7 +10,7 @@ const QUESTIONS = [
         correct: 2
     },
     {
-        question: "How do you say 'Good afternoon'?",
+        question: "How do you say 'Good afternoon' in Spanish?",
         options: ['Buenas noches', 'Buenos días', 'Buenas tardes', 'Hola'],
         correct: 2
     },
@@ -20,7 +20,7 @@ const QUESTIONS = [
         correct: 1
     },
     {
-        question: "How do you say 'Nice to meet you'?",
+        question: "How do you say 'Nice to meet you' in Spanish?",
         options: ['Adiós', 'De nada', 'Mucho gusto', 'Por favor'],
         correct: 2
     },
@@ -36,11 +36,11 @@ const QUESTIONS = [
     },
     {
         question: "What does 'Encantado' mean?",
-        options: ['Goodbye', 'Thank you', 'Pleased to meet you', 'You\'re welcome'],
+        options: ['Goodbye', 'Thank you', 'Pleased to meet you', "You're welcome"],
         correct: 2
     },
     {
-        question: "How do you say 'See you later'?",
+        question: "How do you say 'See you later' in Spanish?",
         options: ['Hola', 'Mucho gusto', 'Hasta luego', 'Buenos días'],
         correct: 2
     },
@@ -51,148 +51,128 @@ const QUESTIONS = [
     }
 ];
 
-// Snake positions: each is left offset in px within a 320px container
-const SNAKE_X = [126, 196, 226, 196, 126, 56, 26, 56, 126, 196];
-
-let nextIndex = 0;
 let completedCount = 0;
-let selectedChoice = null;
-let activeQuestion = null;
+let nextButtonIndex = 0;
+let activeIndex = null;
+let selectedAnswer = null;
 
-function buildSnake() {
-    const path = document.getElementById('snakePath');
-    path.innerHTML = '';
-    path.style.height = `${QUESTIONS.length * 90}px`;
+function buildButtons() {
+    const grid = document.getElementById('buttonsGrid');
+    grid.innerHTML = '';
 
-    QUESTIONS.forEach((q, i) => {
+    for (let i = 0; i < QUESTIONS.length; i++) {
         const btn = document.createElement('button');
-        btn.className = `lesson-btn color-${i}`;
-        btn.id = `btn-${i}`;
-        btn.style.left = `${SNAKE_X[i]}px`;
-        btn.style.top = `${i * 90 + 10}px`;
-        btn.style.position = 'absolute';
+        btn.className = 'button-item';
         btn.textContent = i + 1;
-
-        if (i !== 0) btn.classList.add('locked');
-
-        btn.addEventListener('click', () => onLessonClick(i));
-        path.appendChild(btn);
-    });
+        btn.dataset.index = i;
+        btn.addEventListener('click', () => onButtonClick(i));
+        grid.appendChild(btn);
+    }
 }
 
-function onLessonClick(i) {
-    if (i !== nextIndex) return;
+function onButtonClick(i) {
+    const btn = document.querySelector(`[data-index="${i}"]`);
 
-    activeQuestion = i;
-    selectedChoice = null;
+    if (btn.classList.contains('completed')) return;
 
-    const q = QUESTIONS[i];
-    document.getElementById('questionNum').textContent = `${i + 1} / ${QUESTIONS.length}`;
-    document.getElementById('questionPrompt').textContent = q.question;
+    if (i !== nextButtonIndex) {
+        alert(`Click button ${nextButtonIndex + 1} next!`);
+        return;
+    }
+
+    activeIndex = i;
+    selectedAnswer = null;
+    showQuestion(QUESTIONS[i], i);
+}
+
+function showQuestion(q, i) {
+    document.getElementById('questionTitle').textContent = `Question ${i + 1} / ${QUESTIONS.length}`;
+    document.getElementById('questionText').textContent = q.question;
     document.getElementById('feedback').textContent = '';
     document.getElementById('feedback').className = 'feedback';
 
-    const choicesEl = document.getElementById('choices');
-    choicesEl.innerHTML = '';
+    const container = document.getElementById('answersContainer');
+    container.innerHTML = '';
+
     q.options.forEach((opt, idx) => {
-        const btn = document.createElement('button');
-        btn.className = 'choice';
-        btn.textContent = opt;
-        btn.onclick = () => selectChoice(idx);
-        choicesEl.appendChild(btn);
+        const div = document.createElement('div');
+        div.className = 'answer-option';
+        div.textContent = opt;
+        div.onclick = () => selectAnswer(idx);
+        container.appendChild(div);
     });
 
-    document.getElementById('checkBtn').disabled = false;
-    document.getElementById('modal').classList.add('open');
+    document.getElementById('questionModal').classList.add('show');
 }
 
-function selectChoice(idx) {
-    selectedChoice = idx;
-    document.querySelectorAll('.choice').forEach((el, i) => {
+function selectAnswer(idx) {
+    selectedAnswer = idx;
+    document.querySelectorAll('.answer-option').forEach((el, i) => {
         el.classList.toggle('selected', i === idx);
     });
 }
 
 function checkAnswer() {
-    if (selectedChoice === null) {
-        document.getElementById('feedback').textContent = 'Pick an answer first!';
-        document.getElementById('feedback').className = 'feedback bad';
+    if (selectedAnswer === null) {
+        alert('Please choose an answer!');
         return;
     }
 
-    const q = QUESTIONS[activeQuestion];
-    const choices = document.querySelectorAll('.choice');
-    const correct = selectedChoice === q.correct;
+    const q = QUESTIONS[activeIndex];
+    const isCorrect = selectedAnswer === q.correct;
+    const options = document.querySelectorAll('.answer-option');
+    const feedback = document.getElementById('feedback');
 
-    choices.forEach((el, i) => {
-        el.classList.remove('selected');
-        if (i === q.correct) el.classList.add('correct');
-        else if (i === selectedChoice && !correct) el.classList.add('wrong');
-    });
-
-    document.getElementById('checkBtn').disabled = true;
-
-    if (correct) {
-        document.getElementById('feedback').textContent = '¡Correcto! 🎉';
-        document.getElementById('feedback').className = 'feedback ok';
+    if (isCorrect) {
+        options[selectedAnswer].classList.add('correct');
+        feedback.textContent = '¡Correcto! 🎉';
+        feedback.className = 'feedback show correct';
 
         setTimeout(() => {
-            closeModal();
-            markDone(activeQuestion);
+            closeQuestion();
+            const btn = document.querySelector(`[data-index="${activeIndex}"]`);
+            btn.classList.add('completed');
+            completedCount++;
+            nextButtonIndex++;
+            updateProgress();
+
+            if (completedCount === QUESTIONS.length) {
+                setTimeout(() => alert('🏆 Lesson Complete! ¡Muy bien!'), 200);
+            }
         }, 1200);
     } else {
-        document.getElementById('feedback').textContent = `Not quite — try again!`;
-        document.getElementById('feedback').className = 'feedback bad';
-
-        setTimeout(() => {
-            document.getElementById('checkBtn').disabled = false;
-            selectedChoice = null;
-            choices.forEach(el => el.classList.remove('correct', 'wrong', 'selected'));
-            document.getElementById('feedback').textContent = '';
-            document.getElementById('feedback').className = 'feedback';
-        }, 1500);
+        options[selectedAnswer].classList.add('incorrect');
+        options[q.correct].classList.add('correct');
+        feedback.textContent = '✗ Not quite. The correct answer is highlighted.';
+        feedback.className = 'feedback show incorrect';
     }
 }
 
-function markDone(i) {
-    const btn = document.getElementById(`btn-${i}`);
-    btn.classList.add('done');
+function closeQuestion() {
+    document.getElementById('questionModal').classList.remove('show');
+    activeIndex = null;
+    selectedAnswer = null;
+}
 
-    completedCount++;
-    nextIndex++;
-
+function updateProgress() {
     const pct = (completedCount / QUESTIONS.length) * 100;
     document.getElementById('progressFill').style.width = `${pct}%`;
-
-    if (nextIndex < QUESTIONS.length) {
-        const next = document.getElementById(`btn-${nextIndex}`);
-        next.classList.remove('locked');
-        next.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } else {
-        setTimeout(() => alert('🏆 Lesson complete! ¡Muy bien!'), 300);
-    }
-}
-
-function closeModal() {
-    document.getElementById('modal').classList.remove('open');
-    activeQuestion = null;
-    selectedChoice = null;
+    document.getElementById('progress').textContent = `Progress: ${completedCount}/${QUESTIONS.length}`;
 }
 
 function resetGame() {
-    nextIndex = 0;
     completedCount = 0;
-    selectedChoice = null;
-    activeQuestion = null;
-    document.getElementById('progressFill').style.width = '0%';
-    closeModal();
-    buildSnake();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    nextButtonIndex = 0;
+    activeIndex = null;
+    selectedAnswer = null;
+    closeQuestion();
+    buildButtons();
+    updateProgress();
 }
 
-// Close modal when clicking backdrop
-document.getElementById('modal').addEventListener('click', e => {
-    if (e.target.id === 'modal') closeModal();
+document.getElementById('questionModal').addEventListener('click', e => {
+    if (e.target.id === 'questionModal') closeQuestion();
 });
 
-buildSnake();
+buildButtons();
+updateProgress();

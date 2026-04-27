@@ -7,41 +7,42 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="page">
-
-        <header class="top-bar">
-            <div class="unit-badge">
-                <span class="flag">🇪🇸</span>
-                <div>
-                    <p class="unit-label">Section 1 · Unit 1</p>
-                    <p class="unit-name">Rookie · Spanish Greetings</p>
-                </div>
-            </div>
-            <div class="hearts">❤️ ❤️ ❤️</div>
+    <div class="container">
+        <header>
+            <p class="section-label">Section 1 Unit 1 - Rookie</p>
+            <h1>🇪🇸 Spanish Greetings</h1>
+            <p>Click a button to answer a Spanish question</p>
         </header>
 
-        <div class="progress-bar-wrap">
-            <div class="progress-fill" id="progressFill"></div>
+        <div class="game-area">
+            <div class="buttons-grid" id="buttonsGrid"></div>
         </div>
 
-        <main class="snake-wrap">
-            <div class="snake-path" id="snakePath"></div>
-        </main>
+        <div class="progress">
+            <p id="progress">Progress: 0/10</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
 
-        <button class="reset-btn" onclick="resetGame()">↺ Restart Lesson</button>
+        <button class="reset-btn" onclick="resetGame()">Reset Game</button>
     </div>
 
     <!-- Question Modal -->
-    <div class="modal-overlay" id="modal">
-        <div class="modal-box">
-            <div class="modal-top">
-                <span class="question-num" id="questionNum">1 / 10</span>
-                <button class="x-btn" onclick="closeModal()">✕</button>
+    <div class="modal" id="questionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="questionTitle">Question</h2>
+                <button class="close-btn" onclick="closeQuestion()">&times;</button>
             </div>
-            <p class="question-prompt" id="questionPrompt"></p>
-            <div class="choices" id="choices"></div>
-            <p class="feedback" id="feedback"></p>
-            <button class="check-btn" id="checkBtn" onclick="checkAnswer()">Check Answer</button>
+            <div class="modal-body">
+                <p id="questionText" class="question-text"></p>
+                <div id="answersContainer" class="answers-container"></div>
+                <p id="feedback" class="feedback"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="submit-btn" onclick="checkAnswer()">Submit Answer</button>
+            </div>
         </div>
     </div>
 
