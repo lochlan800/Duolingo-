@@ -1,75 +1,97 @@
-const TOTAL_BUTTONS = 10;
-let completedCount = 0;
-let currentSequence = [];
-let nextButtonIndex = 0;
+const QUESTIONS = [
+    {
+        id: 1,
+        question: "How do you say 'Hello' in Spanish?",
+        spanish: "Hola",
+        options: ['Hola', 'Adiós', 'Gracias', 'Por favor'],
+        correctIndex: 0
+    },
+    {
+        id: 2,
+        question: "How do you greet someone formally?",
+        spanish: "Buenos días",
+        options: ['Buenos días', 'Buenas noches', 'Buenas tardes', 'Hola'],
+        correctIndex: 0
+    },
+    {
+        id: 3,
+        question: "What does 'Buenas tardes' mean?",
+        spanish: "Good afternoon",
+        options: ['Good night', 'Good afternoon', 'Good morning', 'Hello'],
+        correctIndex: 1
+    },
+    {
+        id: 4,
+        question: "How do you say 'Good evening'?",
+        spanish: "Buenas noches",
+        options: ['Buenos días', 'Buenas tardes', 'Buenas noches', 'Hola'],
+        correctIndex: 2
+    },
+    {
+        id: 5,
+        question: "What do you say when meeting someone?",
+        spanish: "Mucho gusto",
+        options: ['Adiós', 'Mucho gusto', 'Gracias', 'De nada'],
+        correctIndex: 1
+    },
+    {
+        id: 6,
+        question: "How do you say 'How are you?' formally?",
+        spanish: "¿Cómo está usted?",
+        options: ['¿Qué tal?', '¿Cómo estás?', '¿Cómo está usted?', 'Bien'],
+        correctIndex: 2
+    },
+    {
+        id: 7,
+        question: "What is an informal way to say 'What\\'s up?'",
+        spanish: "¿Qué tal?",
+        options: ['¿Qué tal?', '¿Cómo está?', '¿Quién eres?', 'Encantado'],
+        correctIndex: 0
+    },
+    {
+        id: 8,
+        question: "How do you respond 'I\\'m fine, thank you'?",
+        spanish: "Bien, gracias",
+        options: ['Mal', 'Bien, gracias', 'Adiós', 'Hola'],
+        correctIndex: 1
+    },
+    {
+        id: 9,
+        question: "What does 'Encantado' mean?",
+        spanish: "Pleased to meet you",
+        options: ['Goodbye', 'Pleased to meet you', 'Thank you', 'You\\'re welcome'],
+        correctIndex: 1
+    },
+    {
+        id: 10,
+        question: "How do you say 'Nice to meet you'?",
+        spanish: "Es un placer conocerte",
+        options: ['Adiós', 'Hola', 'Es un placer conocerte', 'Hasta luego'],
+        correctIndex: 2
+    }
+];
 
-class SnakeButtonGame {
+let completedCount = 0;
+let nextButtonIndex = 0;
+let currentQuestion = null;
+let selectedAnswer = null;
+
+class SpanishGreetingGame {
     constructor() {
         this.buttons = [];
-        this.snakePath = this.generateSnakePath();
+        this.answeredQuestions = new Set();
         this.initializeGame();
-    }
-
-    generateSnakePath() {
-        const path = [];
-        const rows = Math.ceil(Math.sqrt(TOTAL_BUTTONS));
-        const cols = Math.ceil(TOTAL_BUTTONS / rows);
-
-        const grid = [];
-        for (let i = 0; i < rows; i++) {
-            grid[i] = [];
-            for (let j = 0; j < cols; j++) {
-                grid[i][j] = { row: i, col: j };
-            }
-        }
-
-        // Create snake pattern: start middle, go down, then snake right and up
-        const startRow = Math.floor(rows / 2);
-        const startCol = Math.floor(cols / 2);
-
-        let currentRow = startRow;
-        let currentCol = startCol;
-        const visited = new Set();
-
-        for (let i = 0; i < TOTAL_BUTTONS; i++) {
-            const key = `${currentRow},${currentCol}`;
-            if (!visited.has(key)) {
-                visited.add(key);
-                path.push({ row: currentRow, col: currentCol, index: i });
-            }
-
-            // Move in snake pattern
-            if (i === 0) {
-                currentRow += 1; // Start going down
-            } else if (i === 2) {
-                currentCol += 1; // Move right
-            } else if (i === 3) {
-                currentRow -= 1; // Go up
-            } else if (i === 5) {
-                currentCol += 1; // Move right
-            } else if (i === 6) {
-                currentRow += 1; // Go down
-            } else if (i < TOTAL_BUTTONS - 1) {
-                if ((i - 1) % 2 === 0) {
-                    currentCol += 1;
-                } else {
-                    currentRow = currentRow === startRow ? currentRow + 1 : currentRow - 1;
-                }
-            }
-        }
-
-        return path;
     }
 
     initializeGame() {
         const grid = document.getElementById('buttonsGrid');
         grid.innerHTML = '';
 
-        const gridColumn = Math.ceil(Math.sqrt(TOTAL_BUTTONS));
+        const gridColumn = 5;
         grid.style.gridTemplateColumns = `repeat(auto-fit, minmax(80px, 1fr))`;
         grid.style.maxWidth = `${gridColumn * 100}px`;
 
-        for (let i = 0; i < TOTAL_BUTTONS; i++) {
+        for (let i = 0; i < 10; i++) {
             const button = document.createElement('button');
             button.className = 'button-item';
             button.textContent = i + 1;
@@ -79,96 +101,128 @@ class SnakeButtonGame {
             grid.appendChild(button);
             this.buttons.push(button);
         }
-
-        this.shuffleButtons();
-    }
-
-    shuffleButtons() {
-        // Create a snake-like visual arrangement
-        const positions = [];
-        const rows = 2;
-        const cols = 5;
-
-        // Snake pattern: row 1 left to right, row 2 right to left
-        for (let row = 0; row < rows; row++) {
-            if (row % 2 === 0) {
-                for (let col = 0; col < cols; col++) {
-                    positions.push({ row, col, order: row * cols + col });
-                }
-            } else {
-                for (let col = cols - 1; col >= 0; col--) {
-                    positions.push({ row, col, order: row * cols + (cols - 1 - col) });
-                }
-            }
-        }
-
-        const grid = document.getElementById('buttonsGrid');
-
-        // Reorder buttons by snake pattern
-        const buttonsCopy = [...this.buttons];
-        positions.forEach((pos, index) => {
-            if (index < TOTAL_BUTTONS) {
-                const randomButton = buttonsCopy[index];
-                const gridIndex = index;
-                grid.appendChild(randomButton);
-            }
-        });
     }
 
     handleButtonClick(e, index) {
         const button = e.target;
 
         if (button.classList.contains('completed')) {
-            alert('Already completed! Try a different button.');
             return;
         }
 
         if (index !== nextButtonIndex) {
-            alert(`Wrong! Click button ${nextButtonIndex + 1} next.`);
-            button.style.animation = 'shake 0.3s';
-            setTimeout(() => {
-                button.style.animation = '';
-            }, 300);
+            alert(`Start with question ${nextButtonIndex + 1}!`);
             return;
         }
 
-        button.classList.add('completed');
-        nextButtonIndex++;
-        completedCount++;
+        currentQuestion = QUESTIONS[index];
+        selectedAnswer = null;
+        this.showQuestion(QUESTIONS[index]);
+    }
 
-        this.updateProgress();
+    showQuestion(question) {
+        const modal = document.getElementById('questionModal');
+        document.getElementById('questionTitle').textContent = `Question ${question.id}/10`;
+        document.getElementById('questionText').textContent = question.question;
+        document.getElementById('feedback').textContent = '';
+        document.getElementById('feedback').className = 'feedback';
 
-        if (completedCount === TOTAL_BUTTONS) {
-            setTimeout(() => {
-                alert('🎉 Lesson Complete! Great job!');
-            }, 300);
-        }
+        const answersContainer = document.getElementById('answersContainer');
+        answersContainer.innerHTML = '';
+
+        question.options.forEach((option, index) => {
+            const div = document.createElement('div');
+            div.className = 'answer-option';
+            div.textContent = option;
+            div.dataset.index = index;
+            div.addEventListener('click', () => selectAnswer(index));
+            answersContainer.appendChild(div);
+        });
+
+        modal.classList.add('show');
     }
 
     updateProgress() {
-        const percentage = (completedCount / TOTAL_BUTTONS) * 100;
+        const percentage = (completedCount / 10) * 100;
         document.getElementById('progressFill').style.width = `${percentage}%`;
-        document.getElementById('progress').textContent = `Progress: ${completedCount}/${TOTAL_BUTTONS}`;
+        document.getElementById('progress').textContent = `Progress: ${completedCount}/10`;
     }
+}
+
+function selectAnswer(index) {
+    selectedAnswer = index;
+    const options = document.querySelectorAll('.answer-option');
+    options.forEach((opt, i) => {
+        opt.classList.remove('selected');
+        if (i === index) {
+            opt.classList.add('selected');
+        }
+    });
+}
+
+function checkAnswer() {
+    if (selectedAnswer === null) {
+        alert('Please select an answer!');
+        return;
+    }
+
+    const question = currentQuestion;
+    const isCorrect = selectedAnswer === question.correctIndex;
+
+    const feedback = document.getElementById('feedback');
+    const options = document.querySelectorAll('.answer-option');
+
+    if (isCorrect) {
+        feedback.textContent = '✓ Correct! Great job!';
+        feedback.className = 'feedback show correct';
+        options[selectedAnswer].classList.add('correct');
+
+        setTimeout(() => {
+            closeQuestion();
+            const buttonIndex = question.id - 1;
+            const button = document.querySelector(`[data-index="${buttonIndex}"]`);
+            button.classList.add('completed');
+            completedCount++;
+            nextButtonIndex++;
+            game.updateProgress();
+
+            if (completedCount === 10) {
+                setTimeout(() => {
+                    alert('🎉 Lesson Complete! ¡Excelente!');
+                }, 300);
+            }
+        }, 1500);
+    } else {
+        feedback.textContent = '✗ Incorrect. Try again!';
+        feedback.className = 'feedback show incorrect';
+        options[selectedAnswer].classList.add('incorrect');
+        options[question.correctIndex].classList.add('correct');
+    }
+}
+
+function closeQuestion() {
+    const modal = document.getElementById('questionModal');
+    modal.classList.remove('show');
+    currentQuestion = null;
+    selectedAnswer = null;
 }
 
 function resetGame() {
     completedCount = 0;
     nextButtonIndex = 0;
-    game = new SnakeButtonGame();
+    currentQuestion = null;
+    selectedAnswer = null;
+    closeQuestion();
+    game = new SpanishGreetingGame();
+    game.updateProgress();
 }
 
-// Add animation keyframes
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes shake {
-        0% { transform: translateX(0); }
-        25% { transform: translateX(-10px); }
-        50% { transform: translateX(10px); }
-        75% { transform: translateX(-10px); }
-        100% { transform: translateX(0); }
-    }
-`;
-document.head.appendChild(style);
+let game = new SpanishGreetingGame();
+game.updateProgress();
 
-let game = new SnakeButtonGame();
+// Close modal on background click
+document.getElementById('questionModal').addEventListener('click', (e) => {
+    if (e.target.id === 'questionModal') {
+        closeQuestion();
+    }
+});

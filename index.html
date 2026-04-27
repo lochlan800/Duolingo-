@@ -10,8 +10,8 @@
     <div class="container">
         <header>
             <p class="section-label">Section 1 Unit 1 - Rookie</p>
-            <h1>🦉 Duolingo</h1>
-            <p>Complete the lesson</p>
+            <h1>🇪🇸 Spanish Greetings</h1>
+            <p>Learn how to greet people in Spanish</p>
         </header>
 
         <div class="game-area">
@@ -26,6 +26,24 @@
         </div>
 
         <button class="reset-btn" onclick="resetGame()">Reset Game</button>
+    </div>
+
+    <!-- Question Modal -->
+    <div class="modal" id="questionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="questionTitle">Question</h2>
+                <button class="close-btn" onclick="closeQuestion()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="questionText" class="question-text"></p>
+                <div id="answersContainer" class="answers-container"></div>
+                <p id="feedback" class="feedback"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="submit-btn" onclick="checkAnswer()">Submit Answer</button>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
