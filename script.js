@@ -213,13 +213,18 @@ function buildButtons() {
     grid.innerHTML = '';
 
     for (let i = 0; i < LESSONS.length; i++) {
+        const row = document.createElement('div');
+        row.className = 'snake-row';
+
         const btn = document.createElement('button');
         btn.className = 'button-item';
         btn.textContent = i + 1;
         btn.dataset.index = i;
         btn.title = LESSONS[i].title;
         btn.addEventListener('click', () => onButtonClick(i));
-        grid.appendChild(btn);
+
+        row.appendChild(btn);
+        grid.appendChild(row);
     }
 }
 

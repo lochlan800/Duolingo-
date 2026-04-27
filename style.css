@@ -10,7 +10,6 @@ body {
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: center;
     padding: 20px;
 }
 
@@ -21,11 +20,12 @@ body {
     max-width: 600px;
     width: 100%;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    margin: 20px 0;
 }
 
 header {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
 .section-label {
@@ -38,7 +38,7 @@ header {
 }
 
 header h1 {
-    font-size: 48px;
+    font-size: 42px;
     margin-bottom: 10px;
     color: #333;
 }
@@ -48,67 +48,109 @@ header p {
     font-size: 16px;
 }
 
+/* ── Snake Path ── */
 .game-area {
-    margin: 40px 0;
+    margin: 30px 0;
     display: flex;
     justify-content: center;
 }
 
-/* Snake-shape grid: 5 columns, 2 rows */
 .buttons-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 80px);
-    grid-template-rows: repeat(2, 80px);
-    gap: 20px;
-    justify-content: center;
+    position: relative;
+    width: 320px;
+}
+
+.snake-row {
+    height: 100px;
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .button-item {
+    position: absolute;
     width: 80px;
     height: 80px;
     border: none;
-    border-radius: 15px;
+    border-radius: 50%;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform 0.15s, box-shadow 0.15s;
     color: white;
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 2;
 }
 
 .button-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+    transform: translateY(-4px);
 }
 
 .button-item:active {
-    transform: translateY(-2px);
+    transform: translateY(2px);
 }
 
 .button-item.completed {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none !important;
 }
 
-/* Snake pattern: row 1 left-to-right (1-5), row 2 right-to-left (6-10) */
-/* Row 1 */
-.button-item:nth-child(1) { grid-column: 1; grid-row: 1; background: linear-gradient(135deg, #FF6B6B, #FF5252); }
-.button-item:nth-child(2) { grid-column: 2; grid-row: 1; background: linear-gradient(135deg, #FF8C42, #FF7A3D); }
-.button-item:nth-child(3) { grid-column: 3; grid-row: 1; background: linear-gradient(135deg, #FFD93D, #FFC300); }
-.button-item:nth-child(4) { grid-column: 4; grid-row: 1; background: linear-gradient(135deg, #6BCB77, #4CAF50); }
-.button-item:nth-child(5) { grid-column: 5; grid-row: 1; background: linear-gradient(135deg, #4D96FF, #1E90FF); }
+.button-item.completed::after {
+    content: '✓';
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #4CAF50;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
 
-/* Row 2 (reversed for snake shape: 6 on right, 10 on left) */
-.button-item:nth-child(6)  { grid-column: 5; grid-row: 2; background: linear-gradient(135deg, #9D4EDD, #7B2CBF); }
-.button-item:nth-child(7)  { grid-column: 4; grid-row: 2; background: linear-gradient(135deg, #FF006E, #FF1493); }
-.button-item:nth-child(8)  { grid-column: 3; grid-row: 2; background: linear-gradient(135deg, #00D4FF, #00B4D8); }
-.button-item:nth-child(9)  { grid-column: 2; grid-row: 2; background: linear-gradient(135deg, #FFB703, #FB8500); }
-.button-item:nth-child(10) { grid-column: 1; grid-row: 2; background: linear-gradient(135deg, #06FFA5, #00D084); }
+/* Snake positions - left offset within 320px container (button is 80px wide) */
+.snake-row:nth-child(1)  .button-item { left: 120px; background: linear-gradient(135deg, #FF6B6B, #FF5252); box-shadow: 0 6px 0 #c0392b; }
+.snake-row:nth-child(2)  .button-item { left: 180px; background: linear-gradient(135deg, #FF8C42, #FF7A3D); box-shadow: 0 6px 0 #d35400; }
+.snake-row:nth-child(3)  .button-item { left: 220px; background: linear-gradient(135deg, #FFD93D, #FFC300); box-shadow: 0 6px 0 #b8860b; }
+.snake-row:nth-child(4)  .button-item { left: 180px; background: linear-gradient(135deg, #6BCB77, #4CAF50); box-shadow: 0 6px 0 #2e7d32; }
+.snake-row:nth-child(5)  .button-item { left: 120px; background: linear-gradient(135deg, #4D96FF, #1E90FF); box-shadow: 0 6px 0 #1565c0; }
+.snake-row:nth-child(6)  .button-item { left: 60px;  background: linear-gradient(135deg, #9D4EDD, #7B2CBF); box-shadow: 0 6px 0 #4a148c; }
+.snake-row:nth-child(7)  .button-item { left: 20px;  background: linear-gradient(135deg, #FF006E, #FF1493); box-shadow: 0 6px 0 #ad1457; }
+.snake-row:nth-child(8)  .button-item { left: 60px;  background: linear-gradient(135deg, #00D4FF, #00B4D8); box-shadow: 0 6px 0 #006978; }
+.snake-row:nth-child(9)  .button-item { left: 120px; background: linear-gradient(135deg, #FFB703, #FB8500); box-shadow: 0 6px 0 #bf360c; }
+.snake-row:nth-child(10) .button-item { left: 180px; background: linear-gradient(135deg, #06FFA5, #00D084); box-shadow: 0 6px 0 #00695c; }
 
+/* Connector dots between buttons */
+.snake-row::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #ccc;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.snake-row:last-child::after { display: none; }
+
+/* Position dots between consecutive buttons */
+.snake-row:nth-child(1)::after { left: 156px; bottom: -4px; }
+.snake-row:nth-child(2)::after { left: 216px; bottom: -4px; }
+.snake-row:nth-child(3)::after { left: 216px; bottom: -4px; }
+.snake-row:nth-child(4)::after { left: 156px; bottom: -4px; }
+.snake-row:nth-child(5)::after { left: 96px;  bottom: -4px; }
+.snake-row:nth-child(6)::after { left: 36px;  bottom: -4px; }
+.snake-row:nth-child(7)::after { left: 36px;  bottom: -4px; }
+.snake-row:nth-child(8)::after { left: 96px;  bottom: -4px; }
+.snake-row:nth-child(9)::after { left: 156px; bottom: -4px; }
+
+/* ── Progress ── */
 .progress {
     margin: 30px 0;
 }
@@ -155,7 +197,7 @@ header p {
     box-shadow: 0 8px 15px rgba(102, 126, 234, 0.4);
 }
 
-/* Modal */
+/* ── Modal ── */
 .modal {
     display: none;
     position: fixed;
@@ -199,7 +241,7 @@ header p {
 }
 
 .modal-header h2 {
-    font-size: 24px;
+    font-size: 22px;
     color: #333;
 }
 
@@ -286,15 +328,5 @@ header p {
 
 @media (max-width: 600px) {
     .container { padding: 20px; }
-    header h1 { font-size: 36px; }
-    .buttons-grid {
-        grid-template-columns: repeat(5, 60px);
-        grid-template-rows: repeat(2, 60px);
-        gap: 12px;
-    }
-    .button-item {
-        width: 60px;
-        height: 60px;
-        font-size: 22px;
-    }
+    header h1 { font-size: 32px; }
 }
