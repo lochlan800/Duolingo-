@@ -100,6 +100,8 @@ let nextButtonIndex = 0;
 let activeLessonIndex = null;
 let activeQuestionIndex = 0;
 let selectedAnswer = null;
+let questionQueue = [];   // queue of question indices still to answer
+let wrongIndices = new Set();   // question indices that the user got wrong
 
 function buildButtons() {
     const path = document.getElementById('snakePath');
@@ -131,8 +133,13 @@ function onButtonClick(i) {
     }
 
     activeLessonIndex = i;
-    activeQuestionIndex = 0;
     selectedAnswer = null;
+
+    // Initialise the queue with all question indices in order
+    questionQueue = LESSONS[i].questions.map((_, idx) => idx);
+    activeQuestionIndex = questionQueue[0];
+    wrongIndices = new Set();
+
     showCurrentQuestion();
 }
 
@@ -140,8 +147,12 @@ function showCurrentQuestion() {
     const lesson = LESSONS[activeLessonIndex];
     const q = lesson.questions[activeQuestionIndex];
 
-    document.getElementById('questionTitle').textContent =
-        `${lesson.title} (${activeQuestionIndex + 1}/${lesson.questions.length})`;
+    const remaining = questionQueue.length;
+    const isRetry = wrongIndices.has(activeQuestionIndex);
+    const label = isRetry
+        ? `${lesson.title} — retry (${remaining} left)`
+        : `${lesson.title} (${remaining} left)`;
+    document.getElementById('questionTitle').textContent = label;
     document.getElementById('questionText').textContent = q.question;
     document.getElementById('feedback').textContent = '';
     document.getElementById('feedback').className = 'feedback';
@@ -187,29 +198,34 @@ function checkAnswer() {
         feedback.textContent = '¡Correcto! 🎉';
         feedback.className = 'feedback show correct';
 
-        setTimeout(() => {
-            activeQuestionIndex++;
-            if (activeQuestionIndex < lesson.questions.length) {
-                showCurrentQuestion();
-            } else {
-                showSessionComplete();
-            }
-        }, 1100);
+        // Remove this question from the queue
+        questionQueue.shift();
+
+        setTimeout(() => advanceToNextQuestion(), 1100);
     } else {
         options[selectedAnswer].classList.add('incorrect');
         options[q.correct].classList.add('correct');
-        feedback.textContent = '✗ Not quite. Moving on...';
+        feedback.textContent = '✗ Not quite. We\'ll come back to this one!';
         feedback.className = 'feedback show incorrect';
 
-        setTimeout(() => {
-            activeQuestionIndex++;
-            if (activeQuestionIndex < lesson.questions.length) {
-                showCurrentQuestion();
-            } else {
-                showSessionComplete();
-            }
-        }, 1800);
+        // Move this question to the end of the queue so it gets retried
+        const wrong = questionQueue.shift();
+        questionQueue.push(wrong);
+        wrongIndices.add(wrong);
+
+        setTimeout(() => advanceToNextQuestion(), 1800);
     }
+}
+
+function advanceToNextQuestion() {
+    if (questionQueue.length === 0) {
+        showSessionComplete();
+        return;
+    }
+
+    activeQuestionIndex = questionQueue[0];
+    selectedAnswer = null;
+    showCurrentQuestion();
 }
 
 function showSessionComplete() {
@@ -278,6 +294,8 @@ function resetGame() {
     activeLessonIndex = null;
     activeQuestionIndex = 0;
     selectedAnswer = null;
+    questionQueue = [];
+    wrongIndices = new Set();
     closeQuestion();
     buildButtons();
     updateProgress();
