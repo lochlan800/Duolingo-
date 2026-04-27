@@ -1,228 +1,198 @@
 const QUESTIONS = [
     {
-        id: 1,
         question: "How do you say 'Hello' in Spanish?",
-        spanish: "Hola",
         options: ['Hola', 'Adiós', 'Gracias', 'Por favor'],
-        correctIndex: 0
+        correct: 0
     },
     {
-        id: 2,
-        question: "How do you greet someone formally?",
-        spanish: "Buenos días",
-        options: ['Buenos días', 'Buenas noches', 'Buenas tardes', 'Hola'],
-        correctIndex: 0
+        question: "What does 'Buenos días' mean?",
+        options: ['Good night', 'Good afternoon', 'Good morning', 'Goodbye'],
+        correct: 2
     },
     {
-        id: 3,
-        question: "What does 'Buenas tardes' mean?",
-        spanish: "Good afternoon",
-        options: ['Good night', 'Good afternoon', 'Good morning', 'Hello'],
-        correctIndex: 1
+        question: "How do you say 'Good afternoon'?",
+        options: ['Buenas noches', 'Buenos días', 'Buenas tardes', 'Hola'],
+        correct: 2
     },
     {
-        id: 4,
-        question: "How do you say 'Good evening'?",
-        spanish: "Buenas noches",
-        options: ['Buenos días', 'Buenas tardes', 'Buenas noches', 'Hola'],
-        correctIndex: 2
+        question: "What does 'Buenas noches' mean?",
+        options: ['Good morning', 'Good night', 'Good afternoon', 'Hello'],
+        correct: 1
     },
     {
-        id: 5,
-        question: "What do you say when meeting someone?",
-        spanish: "Mucho gusto",
-        options: ['Adiós', 'Mucho gusto', 'Gracias', 'De nada'],
-        correctIndex: 1
-    },
-    {
-        id: 6,
-        question: "How do you say 'How are you?' formally?",
-        spanish: "¿Cómo está usted?",
-        options: ['¿Qué tal?', '¿Cómo estás?', '¿Cómo está usted?', 'Bien'],
-        correctIndex: 2
-    },
-    {
-        id: 7,
-        question: "What is an informal way to say 'What\\'s up?'",
-        spanish: "¿Qué tal?",
-        options: ['¿Qué tal?', '¿Cómo está?', '¿Quién eres?', 'Encantado'],
-        correctIndex: 0
-    },
-    {
-        id: 8,
-        question: "How do you respond 'I\\'m fine, thank you'?",
-        spanish: "Bien, gracias",
-        options: ['Mal', 'Bien, gracias', 'Adiós', 'Hola'],
-        correctIndex: 1
-    },
-    {
-        id: 9,
-        question: "What does 'Encantado' mean?",
-        spanish: "Pleased to meet you",
-        options: ['Goodbye', 'Pleased to meet you', 'Thank you', 'You\\'re welcome'],
-        correctIndex: 1
-    },
-    {
-        id: 10,
         question: "How do you say 'Nice to meet you'?",
-        spanish: "Es un placer conocerte",
-        options: ['Adiós', 'Hola', 'Es un placer conocerte', 'Hasta luego'],
-        correctIndex: 2
+        options: ['Adiós', 'De nada', 'Mucho gusto', 'Por favor'],
+        correct: 2
+    },
+    {
+        question: "How do you ask 'How are you?' (informal)?",
+        options: ['¿Cómo está usted?', '¿Qué tal?', '¿Quién eres?', '¿Dónde estás?'],
+        correct: 1
+    },
+    {
+        question: "How do you say 'I'm fine, thank you'?",
+        options: ['Más o menos', 'Bien, gracias', 'Mal, gracias', 'Hola'],
+        correct: 1
+    },
+    {
+        question: "What does 'Encantado' mean?",
+        options: ['Goodbye', 'Thank you', 'Pleased to meet you', 'You\'re welcome'],
+        correct: 2
+    },
+    {
+        question: "How do you say 'See you later'?",
+        options: ['Hola', 'Mucho gusto', 'Hasta luego', 'Buenos días'],
+        correct: 2
+    },
+    {
+        question: "What is the formal way to say 'How are you?'",
+        options: ['¿Qué tal?', '¿Cómo te llamas?', '¿Cómo está usted?', '¿Bien?'],
+        correct: 2
     }
 ];
 
+// Snake positions: each is left offset in px within a 320px container
+const SNAKE_X = [126, 196, 226, 196, 126, 56, 26, 56, 126, 196];
+
+let nextIndex = 0;
 let completedCount = 0;
-let nextButtonIndex = 0;
-let currentQuestion = null;
-let selectedAnswer = null;
+let selectedChoice = null;
+let activeQuestion = null;
 
-class SpanishGreetingGame {
-    constructor() {
-        this.buttons = [];
-        this.answeredQuestions = new Set();
-        this.initializeGame();
-    }
+function buildSnake() {
+    const path = document.getElementById('snakePath');
+    path.innerHTML = '';
+    path.style.height = `${QUESTIONS.length * 90}px`;
 
-    initializeGame() {
-        const grid = document.getElementById('buttonsGrid');
-        grid.innerHTML = '';
+    QUESTIONS.forEach((q, i) => {
+        const btn = document.createElement('button');
+        btn.className = `lesson-btn color-${i}`;
+        btn.id = `btn-${i}`;
+        btn.style.left = `${SNAKE_X[i]}px`;
+        btn.style.top = `${i * 90 + 10}px`;
+        btn.style.position = 'absolute';
+        btn.textContent = i + 1;
 
-        const gridColumn = 5;
-        grid.style.gridTemplateColumns = `repeat(auto-fit, minmax(80px, 1fr))`;
-        grid.style.maxWidth = `${gridColumn * 100}px`;
+        if (i !== 0) btn.classList.add('locked');
 
-        for (let i = 0; i < 10; i++) {
-            const button = document.createElement('button');
-            button.className = 'button-item';
-            button.textContent = i + 1;
-            button.dataset.index = i;
-            button.addEventListener('click', (e) => this.handleButtonClick(e, i));
-
-            grid.appendChild(button);
-            this.buttons.push(button);
-        }
-    }
-
-    handleButtonClick(e, index) {
-        const button = e.target;
-
-        if (button.classList.contains('completed')) {
-            return;
-        }
-
-        if (index !== nextButtonIndex) {
-            alert(`Start with question ${nextButtonIndex + 1}!`);
-            return;
-        }
-
-        currentQuestion = QUESTIONS[index];
-        selectedAnswer = null;
-        this.showQuestion(QUESTIONS[index]);
-    }
-
-    showQuestion(question) {
-        const modal = document.getElementById('questionModal');
-        document.getElementById('questionTitle').textContent = `Question ${question.id}/10`;
-        document.getElementById('questionText').textContent = question.question;
-        document.getElementById('feedback').textContent = '';
-        document.getElementById('feedback').className = 'feedback';
-
-        const answersContainer = document.getElementById('answersContainer');
-        answersContainer.innerHTML = '';
-
-        question.options.forEach((option, index) => {
-            const div = document.createElement('div');
-            div.className = 'answer-option';
-            div.textContent = option;
-            div.dataset.index = index;
-            div.addEventListener('click', () => selectAnswer(index));
-            answersContainer.appendChild(div);
-        });
-
-        modal.classList.add('show');
-    }
-
-    updateProgress() {
-        const percentage = (completedCount / 10) * 100;
-        document.getElementById('progressFill').style.width = `${percentage}%`;
-        document.getElementById('progress').textContent = `Progress: ${completedCount}/10`;
-    }
+        btn.addEventListener('click', () => onLessonClick(i));
+        path.appendChild(btn);
+    });
 }
 
-function selectAnswer(index) {
-    selectedAnswer = index;
-    const options = document.querySelectorAll('.answer-option');
-    options.forEach((opt, i) => {
-        opt.classList.remove('selected');
-        if (i === index) {
-            opt.classList.add('selected');
-        }
+function onLessonClick(i) {
+    if (i !== nextIndex) return;
+
+    activeQuestion = i;
+    selectedChoice = null;
+
+    const q = QUESTIONS[i];
+    document.getElementById('questionNum').textContent = `${i + 1} / ${QUESTIONS.length}`;
+    document.getElementById('questionPrompt').textContent = q.question;
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('feedback').className = 'feedback';
+
+    const choicesEl = document.getElementById('choices');
+    choicesEl.innerHTML = '';
+    q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice';
+        btn.textContent = opt;
+        btn.onclick = () => selectChoice(idx);
+        choicesEl.appendChild(btn);
+    });
+
+    document.getElementById('checkBtn').disabled = false;
+    document.getElementById('modal').classList.add('open');
+}
+
+function selectChoice(idx) {
+    selectedChoice = idx;
+    document.querySelectorAll('.choice').forEach((el, i) => {
+        el.classList.toggle('selected', i === idx);
     });
 }
 
 function checkAnswer() {
-    if (selectedAnswer === null) {
-        alert('Please select an answer!');
+    if (selectedChoice === null) {
+        document.getElementById('feedback').textContent = 'Pick an answer first!';
+        document.getElementById('feedback').className = 'feedback bad';
         return;
     }
 
-    const question = currentQuestion;
-    const isCorrect = selectedAnswer === question.correctIndex;
+    const q = QUESTIONS[activeQuestion];
+    const choices = document.querySelectorAll('.choice');
+    const correct = selectedChoice === q.correct;
 
-    const feedback = document.getElementById('feedback');
-    const options = document.querySelectorAll('.answer-option');
+    choices.forEach((el, i) => {
+        el.classList.remove('selected');
+        if (i === q.correct) el.classList.add('correct');
+        else if (i === selectedChoice && !correct) el.classList.add('wrong');
+    });
 
-    if (isCorrect) {
-        feedback.textContent = '✓ Correct! Great job!';
-        feedback.className = 'feedback show correct';
-        options[selectedAnswer].classList.add('correct');
+    document.getElementById('checkBtn').disabled = true;
+
+    if (correct) {
+        document.getElementById('feedback').textContent = '¡Correcto! 🎉';
+        document.getElementById('feedback').className = 'feedback ok';
 
         setTimeout(() => {
-            closeQuestion();
-            const buttonIndex = question.id - 1;
-            const button = document.querySelector(`[data-index="${buttonIndex}"]`);
-            button.classList.add('completed');
-            completedCount++;
-            nextButtonIndex++;
-            game.updateProgress();
-
-            if (completedCount === 10) {
-                setTimeout(() => {
-                    alert('🎉 Lesson Complete! ¡Excelente!');
-                }, 300);
-            }
-        }, 1500);
+            closeModal();
+            markDone(activeQuestion);
+        }, 1200);
     } else {
-        feedback.textContent = '✗ Incorrect. Try again!';
-        feedback.className = 'feedback show incorrect';
-        options[selectedAnswer].classList.add('incorrect');
-        options[question.correctIndex].classList.add('correct');
+        document.getElementById('feedback').textContent = `Not quite — try again!`;
+        document.getElementById('feedback').className = 'feedback bad';
+
+        setTimeout(() => {
+            document.getElementById('checkBtn').disabled = false;
+            selectedChoice = null;
+            choices.forEach(el => el.classList.remove('correct', 'wrong', 'selected'));
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('feedback').className = 'feedback';
+        }, 1500);
     }
 }
 
-function closeQuestion() {
-    const modal = document.getElementById('questionModal');
-    modal.classList.remove('show');
-    currentQuestion = null;
-    selectedAnswer = null;
+function markDone(i) {
+    const btn = document.getElementById(`btn-${i}`);
+    btn.classList.add('done');
+
+    completedCount++;
+    nextIndex++;
+
+    const pct = (completedCount / QUESTIONS.length) * 100;
+    document.getElementById('progressFill').style.width = `${pct}%`;
+
+    if (nextIndex < QUESTIONS.length) {
+        const next = document.getElementById(`btn-${nextIndex}`);
+        next.classList.remove('locked');
+        next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        setTimeout(() => alert('🏆 Lesson complete! ¡Muy bien!'), 300);
+    }
+}
+
+function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+    activeQuestion = null;
+    selectedChoice = null;
 }
 
 function resetGame() {
+    nextIndex = 0;
     completedCount = 0;
-    nextButtonIndex = 0;
-    currentQuestion = null;
-    selectedAnswer = null;
-    closeQuestion();
-    game = new SpanishGreetingGame();
-    game.updateProgress();
+    selectedChoice = null;
+    activeQuestion = null;
+    document.getElementById('progressFill').style.width = '0%';
+    closeModal();
+    buildSnake();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-let game = new SpanishGreetingGame();
-game.updateProgress();
-
-// Close modal on background click
-document.getElementById('questionModal').addEventListener('click', (e) => {
-    if (e.target.id === 'questionModal') {
-        closeQuestion();
-    }
+// Close modal when clicking backdrop
+document.getElementById('modal').addEventListener('click', e => {
+    if (e.target.id === 'modal') closeModal();
 });
+
+buildSnake();
