@@ -68,6 +68,22 @@ header p {
 .snake-row.pos-left        { justify-content: center; padding-right: 80px; }
 .snake-row.pos-far-left    { justify-content: center; padding-right: 160px; }
 
+@keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+}
+
+@keyframes starPop {
+    0%   { transform: scale(0) rotate(-30deg); opacity: 0; }
+    60%  { transform: scale(1.3) rotate(15deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes starWiggle {
+    0%, 100% { transform: rotate(-12deg) scale(1); }
+    50%      { transform: rotate(12deg) scale(1.1); }
+}
+
 .lesson-btn {
     width: 80px;
     height: 80px;
@@ -83,7 +99,20 @@ header p {
     transition: transform 0.15s;
     position: relative;
     flex-shrink: 0;
+    animation: bob 2.5s ease-in-out infinite;
 }
+
+/* Stagger the bob so they don't all move together */
+.snake-row:nth-of-type(1)  .lesson-btn { animation-delay: 0s;    }
+.snake-row:nth-of-type(2)  .lesson-btn { animation-delay: 0.2s;  }
+.snake-row:nth-of-type(3)  .lesson-btn { animation-delay: 0.4s;  }
+.snake-row:nth-of-type(4)  .lesson-btn { animation-delay: 0.6s;  }
+.snake-row:nth-of-type(5)  .lesson-btn { animation-delay: 0.8s;  }
+.snake-row:nth-of-type(6)  .lesson-btn { animation-delay: 1.0s;  }
+.snake-row:nth-of-type(7)  .lesson-btn { animation-delay: 1.2s;  }
+.snake-row:nth-of-type(8)  .lesson-btn { animation-delay: 1.4s;  }
+.snake-row:nth-of-type(9)  .lesson-btn { animation-delay: 1.6s;  }
+.snake-row:nth-of-type(10) .lesson-btn { animation-delay: 1.8s;  }
 
 /* Progress lines around button (4 segments) */
 .lesson-btn::before {
@@ -119,8 +148,21 @@ header p {
     background: conic-gradient(from 0deg, #4CAF50 0deg, #4CAF50 360deg);
 }
 
-.lesson-btn:hover { transform: translateY(-4px); }
-.lesson-btn:active { transform: translateY(2px); }
+.lesson-btn:hover { animation: none; transform: translateY(-8px) scale(1.06); }
+.lesson-btn:active { animation: none; transform: translateY(2px) scale(0.96); }
+
+/* Star on fully-completed buttons (4/4 segments) */
+.lesson-btn[data-completions="4"]::after {
+    content: '⭐';
+    position: absolute;
+    top: -16px;
+    right: -14px;
+    font-size: 32px;
+    z-index: 3;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+    animation: starPop 0.5s ease-out, starWiggle 2s ease-in-out 0.5s infinite;
+    pointer-events: none;
+}
 
 /* Lesson button colors */
 .lesson-btn.c0 { background: linear-gradient(135deg,#FF6B6B,#FF5252); box-shadow: 0 6px 0 #c0392b; }
