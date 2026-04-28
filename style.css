@@ -69,8 +69,10 @@ header p {
 .snake-row.pos-far-left    { justify-content: center; padding-right: 160px; }
 
 @keyframes bob {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-6px); }
+    0%, 100% { transform: translateY(0) scale(1); }
+    25%      { transform: translateY(-14px) scale(1.04); }
+    50%      { transform: translateY(0) scale(1); }
+    75%      { transform: translateY(-8px) scale(1.02); }
 }
 
 @keyframes starPop {
@@ -99,7 +101,7 @@ header p {
     transition: transform 0.15s;
     position: relative;
     flex-shrink: 0;
-    animation: bob 2.5s ease-in-out infinite;
+    animation: bob 1.6s ease-in-out infinite;
 }
 
 /* Stagger the bob so they don't all move together */
