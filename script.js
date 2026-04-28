@@ -114,11 +114,22 @@ function buildButtons() {
 
         const btn = document.createElement('button');
         btn.className = `lesson-btn c${i}`;
-        btn.textContent = i + 1;
         btn.dataset.index = i;
         btn.dataset.completions = buttonCompletions[i];
         btn.title = LESSONS[i].title;
         btn.addEventListener('click', () => onButtonClick(i));
+
+        // Add number span (hidden when button is fully completed)
+        const numberSpan = document.createElement('span');
+        numberSpan.className = 'button-number';
+        numberSpan.textContent = i + 1;
+        btn.appendChild(numberSpan);
+
+        // Add trophy span (shown when button is fully completed)
+        const trophySpan = document.createElement('span');
+        trophySpan.className = 'button-trophy';
+        trophySpan.textContent = '🏆';
+        btn.appendChild(trophySpan);
 
         row.appendChild(btn);
         path.appendChild(row);
