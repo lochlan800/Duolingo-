@@ -83,28 +83,46 @@ header p {
     transition: transform 0.15s;
     position: relative;
     flex-shrink: 0;
+    outline: 3px solid rgba(255,255,255,0.3);
+    outline-offset: 8px;
+}
+
+/* Progress lines around button (4 segments) */
+.lesson-btn::before {
+    content: '';
+    position: absolute;
+    width: 104px;
+    height: 104px;
+    top: -12px;
+    left: -12px;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        rgba(255,255,255,0.3) 0deg,
+        rgba(255,255,255,0.3) 90deg,
+        rgba(255,255,255,0.1) 90deg,
+        rgba(255,255,255,0.1) 360deg
+    );
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Update segments based on completion count */
+.lesson-btn[data-completions="1"]::before {
+    background: conic-gradient(from 0deg, #4CAF50 0deg, #4CAF50 90deg, rgba(255,255,255,0.1) 90deg, rgba(255,255,255,0.1) 360deg);
+}
+.lesson-btn[data-completions="2"]::before {
+    background: conic-gradient(from 0deg, #4CAF50 0deg, #4CAF50 180deg, rgba(255,255,255,0.1) 180deg, rgba(255,255,255,0.1) 360deg);
+}
+.lesson-btn[data-completions="3"]::before {
+    background: conic-gradient(from 0deg, #4CAF50 0deg, #4CAF50 270deg, rgba(255,255,255,0.1) 270deg, rgba(255,255,255,0.1) 360deg);
+}
+.lesson-btn[data-completions="4"]::before {
+    background: conic-gradient(from 0deg, #4CAF50 0deg, #4CAF50 360deg);
 }
 
 .lesson-btn:hover { transform: translateY(-4px); }
 .lesson-btn:active { transform: translateY(2px); }
-.lesson-btn.completed { opacity: 0.55; cursor: default; }
-
-.lesson-btn.completed::after {
-    content: '✓';
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    background: #4CAF50;
-    color: white;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-}
 
 /* Lesson button colors */
 .lesson-btn.c0 { background: linear-gradient(135deg,#FF6B6B,#FF5252); box-shadow: 0 6px 0 #c0392b; }

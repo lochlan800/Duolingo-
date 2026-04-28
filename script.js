@@ -97,6 +97,7 @@ const SNAKE_POSITIONS = [
 
 let completedCount = 0;
 let nextButtonIndex = 0;
+let buttonCompletions = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // track how many times each button completed (0-4)
 let activeLessonIndex = null;
 let activeQuestionIndex = 0;
 let selectedAnswer = null;
@@ -115,6 +116,7 @@ function buildButtons() {
         btn.className = `lesson-btn c${i}`;
         btn.textContent = i + 1;
         btn.dataset.index = i;
+        btn.dataset.completions = buttonCompletions[i];
         btn.title = LESSONS[i].title;
         btn.addEventListener('click', () => onButtonClick(i));
 
@@ -125,9 +127,9 @@ function buildButtons() {
 
 function onButtonClick(i) {
     const btn = document.querySelector(`[data-index="${i}"]`);
-    if (btn.classList.contains('completed')) return;
 
-    if (i !== nextButtonIndex) {
+    // Allow clicking on any button that has been unlocked (not a locked button in front of it)
+    if (i > nextButtonIndex) {
         alert(`Click button ${nextButtonIndex + 1} next!`);
         return;
     }
@@ -261,11 +263,22 @@ function finishLesson() {
     submitBtn.classList.remove('finish-btn');
 
     const btn = document.querySelector(`[data-index="${activeLessonIndex}"]`);
-    btn.classList.add('completed');
-    completedCount++;
-    nextButtonIndex++;
-    updateProgress();
 
+    // Increment completion count for this button (max 4)
+    buttonCompletions[activeLessonIndex]++;
+    if (buttonCompletions[activeLessonIndex] > 4) {
+        buttonCompletions[activeLessonIndex] = 4;
+    }
+
+    btn.dataset.completions = buttonCompletions[activeLessonIndex];
+
+    // Only count as completed once for progress tracking
+    if (buttonCompletions[activeLessonIndex] === 1) {
+        completedCount++;
+        nextButtonIndex++;
+    }
+
+    updateProgress();
     closeQuestion();
 
     if (completedCount === LESSONS.length) {
@@ -291,6 +304,7 @@ function updateProgress() {
 function resetGame() {
     completedCount = 0;
     nextButtonIndex = 0;
+    buttonCompletions = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     activeLessonIndex = null;
     activeQuestionIndex = 0;
     selectedAnswer = null;
