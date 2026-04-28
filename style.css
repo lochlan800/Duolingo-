@@ -83,18 +83,16 @@ header p {
     transition: transform 0.15s;
     position: relative;
     flex-shrink: 0;
-    outline: 3px solid rgba(255,255,255,0.3);
-    outline-offset: 8px;
 }
 
 /* Progress lines around button (4 segments) */
 .lesson-btn::before {
     content: '';
     position: absolute;
-    width: 104px;
-    height: 104px;
-    top: -12px;
-    left: -12px;
+    width: 96px;
+    height: 96px;
+    top: -8px;
+    left: -8px;
     border-radius: 50%;
     background: conic-gradient(
         from 0deg,
