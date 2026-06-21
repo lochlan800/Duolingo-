@@ -1,209 +1,194 @@
-// Lessons progress from single greeting words → full conversational sentences.
-// Every lesson now TEACHES its words first (the `teach` cards), then quizzes
-// with a random selection from a larger `questions` pool so replays stay fresh.
+// Progressive curriculum: words → phrases → sentences
+// Buttons 1-2: Basic greetings
+// Buttons 3-4: Time-of-day building blocks
+// Buttons 5-6: Time-of-day phrases
+// Buttons 7-8: Identity & verbs
+// Buttons 9-10: Conversations & full greetings
 const LESSONS = [
     {
-        title: "Greeting Words",
-        intro: "Brand new to Spanish? Start here! Learn these greeting words 👇",
+        title: "Essential Greetings",
+        intro: "Start with the most important words you'll hear every day! 👇",
         teach: [
             { emoji: "👋", es: "Hola",     en: "Hello" },
             { emoji: "👋", es: "Adiós",    en: "Goodbye" },
             { emoji: "🙏", es: "Gracias",  en: "Thank you" },
-            { emoji: "🥺", es: "Por favor", en: "Please" },
             { emoji: "✅", es: "Sí",       en: "Yes" },
             { emoji: "❌", es: "No",       en: "No" },
-            { emoji: "🙇", es: "Perdón",   en: "Sorry" }
+            { emoji: "🥺", es: "Por favor", en: "Please" }
         ],
         questions: [
             { question: "How do you say 'Hello'?",      options: ['Hola','Adiós','Gracias','Sí'], correct: 0 },
             { question: "What does 'Adiós' mean?",      options: ['Hello','Goodbye','Thanks','Sorry'], correct: 1 },
             { question: "How do you say 'Thank you'?",  options: ['Hola','Gracias','Sí','Perdón'], correct: 1 },
-            { question: "How do you say 'Sorry'?",      options: ['Hola','Adiós','Perdón','Gracias'], correct: 2 },
             { question: "Which word means 'Yes'?",      options: ['No','Sí','Hola','Gracias'], correct: 1 },
             { question: "What does 'Por favor' mean?",  options: ['Thank you','Please','Sorry','Hello'], correct: 1 },
-            { question: "What does 'Gracias' mean?",    options: ['Sorry','Please','Thank you','Goodbye'], correct: 2 },
-            { question: "How do you say 'No'?",         options: ['Sí','No','Perdón','Hola'], correct: 1 }
+            { question: "How do you say 'No'?",         options: ['Sí','No','Perdón','Hola'], correct: 1 },
+            { question: "Complete the greeting: 'Hola, ___'", options: ['Adiós','Gracias','Sí','Hola'], correct: 3 }
         ]
     },
     {
-        title: "Sentence Building Words",
-        intro: "These little words build bigger greetings. Learn them first! 👇",
-        teach: [
-            { emoji: "👍", es: "Buenos",  en: "Good (masculine)" },
-            { emoji: "👍", es: "Buenas",  en: "Good (feminine)" },
-            { emoji: "☀️", es: "días",    en: "days" },
-            { emoji: "🌇", es: "tardes",  en: "afternoons" },
-            { emoji: "🌙", es: "noches",  en: "nights" },
-            { emoji: "⏳", es: "hasta",   en: "until" },
-            { emoji: "📅", es: "mañana",  en: "tomorrow / morning" },
-            { emoji: "⏰", es: "luego",   en: "later" }
-        ],
-        questions: [
-            { question: "What does 'Buenos' mean?",       options: ['Bad','Good','Big','Small'], correct: 1 },
-            { question: "What does 'días' mean?",         options: ['Nights','Days','Hours','Years'], correct: 1 },
-            { question: "What does 'tardes' mean?",       options: ['Mornings','Afternoons','Nights','Days'], correct: 1 },
-            { question: "What does 'noches' mean?",       options: ['Days','Mornings','Nights','Afternoons'], correct: 2 },
-            { question: "What does 'hasta' mean?",        options: ['From','Until','At','With'], correct: 1 },
-            { question: "What does 'mañana' mean?",       options: ['Tomorrow','Yesterday','Today','Always'], correct: 0 },
-            { question: "What does 'luego' mean?",        options: ['Now','Later','Never','Soon'], correct: 1 },
-            { question: "Which word means 'nights'?",     options: ['días','tardes','noches','hasta'], correct: 2 }
-        ]
-    },
-    {
-        title: "Two-Word Phrases",
-        intro: "Now join words into real phrases. Learn these first! 👇",
-        teach: [
-            { emoji: "☀️", es: "Buenos días",   en: "Good morning" },
-            { emoji: "🌇", es: "Buenas tardes", en: "Good afternoon" },
-            { emoji: "🌙", es: "Buenas noches", en: "Good night" },
-            { emoji: "👋", es: "Hasta luego",   en: "See you later" },
-            { emoji: "📅", es: "Hasta mañana",  en: "See you tomorrow" },
-            { emoji: "🤝", es: "Mucho gusto",   en: "Nice to meet you" }
-        ],
-        questions: [
-            { question: "How do you say 'Good morning'?",   options: ['Buenas noches','Buenos días','Buenas tardes','Hola días'], correct: 1 },
-            { question: "How do you say 'Good afternoon'?", options: ['Buenas tardes','Buenos días','Buenas noches','Hola tardes'], correct: 0 },
-            { question: "How do you say 'Good night'?",     options: ['Buenos noches','Buenas noches','Buenos días','Hola noches'], correct: 1 },
-            { question: "How do you say 'See you later'?",  options: ['Hasta mañana','Hasta luego','Hasta pronto','Adiós luego'], correct: 1 },
-            { question: "How do you say 'See you tomorrow'?", options: ['Hasta luego','Hasta pronto','Hasta mañana','Adiós mañana'], correct: 2 },
-            { question: "What does 'Mucho gusto' mean?",    options: ['Many thanks','Nice to meet you','Good morning','See you'], correct: 1 },
-            { question: "What does 'Buenas noches' mean?",  options: ['Good morning','Good night','Good afternoon','Hello'], correct: 1 },
-            { question: "Translate: 'Buenas tardes'",       options: ['Good morning','Good afternoon','Good night','See you'], correct: 1 }
-        ]
-    },
-    {
-        title: "Pronouns & Verbs",
-        intro: "Words for 'I', 'you' and 'to be'. Learn these first! 👇",
-        teach: [
-            { emoji: "🙋", es: "Yo",     en: "I" },
-            { emoji: "👉", es: "Tú",     en: "You (informal)" },
-            { emoji: "🎩", es: "Usted",  en: "You (formal)" },
-            { emoji: "🆔", es: "Soy",    en: "I am (always true)" },
-            { emoji: "📍", es: "Estoy",  en: "I am (right now)" },
-            { emoji: "🫰", es: "Mi",     en: "My" }
-        ],
-        questions: [
-            { question: "What does 'Yo' mean?",                options: ['You','I','He','We'], correct: 1 },
-            { question: "What does 'tú' mean? (informal)",     options: ['I','You','He','They'], correct: 1 },
-            { question: "What does 'soy' mean?",               options: ['You are','I am','He is','We are'], correct: 1 },
-            { question: "What does 'estoy' mean? (right now)", options: ['I have','I am','I want','I go'], correct: 1 },
-            { question: "What does 'usted' mean?",             options: ['You (informal)','You (formal)','He','We'], correct: 1 },
-            { question: "What does 'mi' mean?",                options: ['Your','My','His','Our'], correct: 1 },
-            { question: "How do you say 'I'?",                 options: ['Tú','Yo','Mi','Usted'], correct: 1 },
-            { question: "Which means 'I am from Spain' uses?", options: ['Soy','Estoy','Mi','Tú'], correct: 0 }
-        ]
-    },
-    {
-        title: "Short Phrases",
-        intro: "Say your name and where you're from. Learn these first! 👇",
-        teach: [
-            { emoji: "🏷️", es: "Me llamo",      en: "My name is" },
-            { emoji: "🌍", es: "Soy de",        en: "I am from" },
-            { emoji: "🆔", es: "Soy",           en: "I am" },
-            { emoji: "✍️", es: "Mi nombre es",  en: "My name is" }
-        ],
-        questions: [
-            { question: "How do you say 'My name is'?",   options: ['Mi llamo','Me llamo','Yo llamo','Tú llamas'], correct: 1 },
-            { question: "What does 'Soy de' mean?",       options: ['I have','I am from','I want','I go to'], correct: 1 },
-            { question: "How do you say 'My name is Ana'?", options: ['Mi llamo Ana','Me llamo Ana','Soy Ana llamo','Yo llamo Ana'], correct: 1 },
-            { question: "Translate: 'Soy de España'",     options: ['I want Spain','I am from Spain','I go to Spain','I love Spain'], correct: 1 },
-            { question: "How do you say 'I am Juan'?",     options: ['Yo Juan','Soy Juan','Me Juan','Mi Juan'], correct: 1 },
-            { question: "What does 'Me llamo Sofía' mean?", options: ['I am from Sofía','My name is Sofía','I see Sofía','Hello Sofía'], correct: 1 },
-            { question: "How do you say 'I am from Mexico'?", options: ['Soy México','Soy de México','Yo México','Estoy México'], correct: 1 }
-        ]
-    },
-    {
-        title: "Asking Questions",
-        intro: "Ask people about themselves. Learn these first! 👇",
-        teach: [
-            { emoji: "💬", es: "¿Cómo estás?",      en: "How are you? (informal)" },
-            { emoji: "🎩", es: "¿Cómo está usted?", en: "How are you? (formal)" },
-            { emoji: "🏷️", es: "¿Cómo te llamas?",  en: "What's your name?" },
-            { emoji: "🌍", es: "¿De dónde eres?",   en: "Where are you from?" },
-            { emoji: "😎", es: "¿Qué tal?",         en: "What's up?" }
-        ],
-        questions: [
-            { question: "How do you ask 'How are you?' (informal)?", options: ['¿Cómo está usted?','¿Cómo estás?','¿Qué llamas?','¿De dónde vas?'], correct: 1 },
-            { question: "How do you ask 'How are you?' (formal)?",   options: ['¿Cómo estás?','¿Cómo está usted?','¿Qué tal tú?','¿De dónde eres?'], correct: 1 },
-            { question: "How do you ask 'What is your name?'",       options: ['¿Quién eres?','¿Cómo te llamas?','¿De dónde eres?','¿Qué tal?'], correct: 1 },
-            { question: "How do you ask 'Where are you from?'",      options: ['¿Cómo estás?','¿Qué tal?','¿De dónde eres?','¿Cómo te llamas?'], correct: 2 },
-            { question: "What does '¿Qué tal?' mean?",               options: ['Who are you?',"How are you?/What's up?",'Where are you?','When?'], correct: 1 },
-            { question: "What does '¿De dónde eres?' mean?",         options: ["What's your name?",'Where are you from?','How are you?','How old are you?'], correct: 1 },
-            { question: "What does '¿Cómo te llamas?' mean?",        options: ['How are you?',"What's your name?",'Where are you from?',"What's up?"], correct: 1 }
-        ]
-    },
-    {
-        title: "Quick Responses",
-        intro: "How to answer 'How are you?'. Learn these first! 👇",
+        title: "Common Responses",
+        intro: "How people answer when you greet them. You'll hear these all the time! 👇",
         teach: [
             { emoji: "🙂", es: "Bien",         en: "Well / Good" },
             { emoji: "😄", es: "Muy bien",     en: "Very well" },
             { emoji: "🙁", es: "Mal",          en: "Bad" },
             { emoji: "😐", es: "Más o menos",  en: "So-so" },
-            { emoji: "🙏", es: "Bien, gracias", en: "Well, thanks" }
+            { emoji: "🙏", es: "Gracias, ¿y tú?", en: "Thanks, and you?" }
         ],
         questions: [
-            { question: "How do you respond 'I'm well, thank you'?", options: ['Mal, gracias','Bien, gracias','Hola, gracias','Sí, gracias'], correct: 1 },
-            { question: "How do you say 'Very well'?",               options: ['Muy mal','Muy bien','Más o menos','No bien'], correct: 1 },
-            { question: "What does 'Más o menos' mean?",             options: ['Very well','So-so','Terrible','Excellent'], correct: 1 },
-            { question: "What does 'Mal' mean?",                     options: ['Good','Bad','Great','Tired'], correct: 1 },
-            { question: "What does 'Estoy bien' mean?",              options: ['I am well','I am tired','I have well','I want well'], correct: 0 },
-            { question: "What does 'Muy bien' mean?",                options: ['Very bad','Very well','So-so','Goodbye'], correct: 1 },
-            { question: "Reply if you feel great: '¿Cómo estás?'",   options: ['Mal','Muy bien','Adiós','¿Qué tal?'], correct: 1 }
+            { question: "How do you say 'Very well'?",   options: ['Muy mal','Muy bien','Más o menos','No bien'], correct: 1 },
+            { question: "What does 'Más o menos' mean?", options: ['Very well','So-so','Terrible','Excellent'], correct: 1 },
+            { question: "What does 'Mal' mean?",         options: ['Good','Bad','Great','Tired'], correct: 1 },
+            { question: "When someone says 'Hola', you can respond:", options: ['Adiós','Muy bien','Gracias','No'], correct: 1 },
+            { question: "What does 'Bien' mean?",        options: ['Bad','Good/Well','Never','Always'], correct: 1 },
+            { question: "Which response is enthusiastic?", options: ['Mal','Más o menos','Muy bien','Adiós'], correct: 2 }
         ]
     },
     {
-        title: "Combined Greetings",
-        intro: "Put two greetings together. Learn these first! 👇",
+        title: "Time of Day Words",
+        intro: "Words that describe different times. You'll build phrases with these! 👇",
         teach: [
-            { emoji: "😎", es: "Hola, ¿qué tal?",            en: "Hi, what's up?" },
-            { emoji: "☀️", es: "Buenos días, ¿cómo estás?", en: "Good morning, how are you?" },
-            { emoji: "👋", es: "Adiós, hasta luego",         en: "Goodbye, see you later" },
-            { emoji: "🌙", es: "Buenas noches, hasta mañana", en: "Good night, see you tomorrow" }
+            { emoji: "☀️", es: "días",    en: "days" },
+            { emoji: "🌇", es: "tardes",  en: "afternoons" },
+            { emoji: "🌙", es: "noches",  en: "nights" },
+            { emoji: "👍", es: "Buenos",  en: "Good (masc.)" },
+            { emoji: "👍", es: "Buenas",  en: "Good (fem.)" }
         ],
         questions: [
-            { question: "Translate: 'Hola, ¿qué tal?'",            options: ["Hi, what's your name?","Hi, how are you?/what's up?",'Hi, where are you?','Hi, goodbye'], correct: 1 },
-            { question: "Translate: 'Buenos días, ¿cómo estás?'",  options: ['Good night, how are you?','Good morning, how are you?','Goodbye, how are you?',"Hello, what's your name?"], correct: 1 },
-            { question: "How do you say 'Goodbye, see you later'?", options: ['Hola, hasta luego','Adiós, hasta luego','Adiós, mucho gusto','Hola, hasta mañana'], correct: 1 },
-            { question: "How do you say 'Hello, how are you?'",     options: ['Hola, ¿qué tal?','Hola, ¿cómo estás?','Adiós, ¿cómo estás?','Gracias, ¿qué tal?'], correct: 1 },
-            { question: "Translate: 'Buenas noches, hasta mañana'", options: ['Good morning, see you tomorrow','Good night, see you tomorrow','Goodbye, see you later','Good night, see you soon'], correct: 1 },
-            { question: "Translate: 'Adiós, buenas noches'",        options: ['Hello, good night','Goodbye, good morning','Goodbye, good night','See you, good night'], correct: 2 }
+            { question: "What does 'días' mean?",        options: ['Nights','Days','Hours','Years'], correct: 1 },
+            { question: "What does 'tardes' mean?",      options: ['Mornings','Afternoons','Nights','Days'], correct: 1 },
+            { question: "What does 'noches' mean?",      options: ['Days','Mornings','Nights','Afternoons'], correct: 2 },
+            { question: "What does 'Buenos' mean?",      options: ['Bad','Good','Big','Small'], correct: 1 },
+            { question: "When is it 'noches'?",          options: ['Morning','Afternoon','Night','Daytime'], correct: 2 },
+            { question: "In Spanish, 'Good' for masculine is:", options: ['Buena','Buenos','Buenes','Buenos'], correct: 1 }
         ]
     },
     {
-        title: "Introducing Yourself",
-        intro: "Introduce yourself to someone new. Learn these first! 👇",
+        title: "Connecting Words",
+        intro: "Words that link phrases together. They help make longer sentences! 👇",
         teach: [
-            { emoji: "🙋", es: "Hola, me llamo...",   en: "Hi, my name is..." },
-            { emoji: "🤝", es: "Mucho gusto, soy...", en: "Nice to meet you, I'm..." },
-            { emoji: "🌍", es: "Soy de...",           en: "I'm from..." },
-            { emoji: "😊", es: "Encantado/a",         en: "Pleased to meet you" }
+            { emoji: "⏳", es: "hasta",   en: "until / till" },
+            { emoji: "⏰", es: "luego",   en: "later" },
+            { emoji: "📅", es: "mañana",  en: "tomorrow" },
+            { emoji: "🤝", es: "Mucho gusto", en: "Nice to meet you" }
         ],
         questions: [
-            { question: "Translate: 'Hola, me llamo Juan'",          options: ['Hi, your name is Juan','Hi, my name is Juan','Goodbye, my name is Juan','Hi, I see Juan'], correct: 1 },
-            { question: "How do you say 'Nice to meet you, I am María'?", options: ['Hola, soy María','Mucho gusto, soy María','Adiós, soy María','Gracias, soy María'], correct: 1 },
-            { question: "Translate: 'Soy de España, ¿y tú?'",        options: ['I am Spain, and you?','I am from Spain, and you?','I go to Spain, and you?','I want Spain, and you?'], correct: 1 },
-            { question: "How do you say 'My name is Ana, I am from Mexico'?", options: ['Mi Ana, de México','Me llamo Ana, soy de México','Soy Ana de México','Llamo Ana, México'], correct: 1 },
-            { question: "How do you say 'Hi, I am Pedro'?",          options: ['Hola, soy Pedro','Adiós, soy Pedro','Hola, mi Pedro','Hola, Pedro soy'], correct: 0 },
-            { question: "Translate: 'Encantado de conocerte'",       options: ['How are you?','Pleased to meet you','See you later','I am from'], correct: 1 }
+            { question: "What does 'hasta' mean?",       options: ['From','Until','At','With'], correct: 1 },
+            { question: "What does 'luego' mean?",       options: ['Now','Later','Never','Soon'], correct: 1 },
+            { question: "What does 'mañana' mean?",      options: ['Tomorrow','Yesterday','Today','Always'], correct: 0 },
+            { question: "What does 'Mucho gusto' mean?", options: ['Many thanks','Nice to meet you','Good morning','See you'], correct: 1 },
+            { question: "You say goodbye: 'Adiós, ___'",  options: ['Hola','hasta luego','Muy bien','días'], correct: 1 }
         ]
     },
     {
-        title: "Full Greeting Conversations",
-        intro: "Hold a whole greeting chat! Learn these first! 👇",
+        title: "Daytime Greetings",
+        intro: "Combine time words into real phrases people use every day! 👇",
         teach: [
-            { emoji: "🗣️", es: "¡Hola! Me llamo...",  en: "Hi! My name is..." },
-            { emoji: "🏷️", es: "¿Cómo te llamas?",    en: "What's your name?" },
-            { emoji: "🌍", es: "¿De dónde eres?",     en: "Where are you from?" },
-            { emoji: "🤝", es: "Mucho gusto",         en: "Nice to meet you" }
+            { emoji: "☀️", es: "Buenos días",   en: "Good morning" },
+            { emoji: "🌇", es: "Buenas tardes", en: "Good afternoon" },
+            { emoji: "🌙", es: "Buenas noches", en: "Good night" }
         ],
         questions: [
-            { question: "Translate: 'Hola, buenos días, ¿cómo estás?'", options: ['Hi, good night, how are you?','Hi, good morning, how are you?','Bye, good morning, how are you?',"Hi, good morning, what's your name?"], correct: 1 },
-            { question: "How do you say 'Hello! My name is María. Nice to meet you'?", options: ['¡Hola! Soy María. Adiós','¡Hola! Me llamo María. Mucho gusto','¡Hola! Mi María. Gracias','¡Hola! Llamo María. Hasta luego'], correct: 1 },
-            { question: "Translate: 'Buenos días, soy Juan, ¿de dónde eres?'", options: ["Good night, I'm Juan, where are you from?","Good morning, I'm Juan, where are you from?","Hello, I'm Juan, how are you?",'Good morning, are you Juan, where?'], correct: 1 },
-            { question: "How do you say 'Hi friend, what's up? How are you?'", options: ['Hola amigo, ¿qué tal? ¿Cómo estás?','Adiós amigo, ¿qué? ¿Cómo?','Hola, amigo qué tal cómo','Hola amigo, mucho gusto'], correct: 0 },
-            { question: "How do you greet someone formally in the morning?", options: ['Hola, ¿qué tal?','Buenos días, ¿cómo está usted?','Adiós, buenos días','Mucho gusto, hola'], correct: 1 },
-            { question: "How would you fully introduce yourself to a new friend?", options: ['Adiós, me llamo... ¿y tú?','Hola, me llamo... ¿Cómo te llamas?','Gracias, soy... ¿qué tal?','Hola, mi... ¿quién?'], correct: 1 }
+            { question: "How do you say 'Good morning'?",   options: ['Buenas noches','Buenos días','Buenas tardes','Hola días'], correct: 1 },
+            { question: "How do you say 'Good afternoon'?", options: ['Buenas tardes','Buenos días','Buenas noches','Hola tardes'], correct: 0 },
+            { question: "How do you say 'Good night'?",     options: ['Buenos noches','Buenas noches','Buenos días','Hola noches'], correct: 1 },
+            { question: "When is it appropriate to say 'Buenos días'?", options: ['Morning','Afternoon','Night','Anytime'], correct: 0 },
+            { question: "Which is afternoon greeting?", options: ['Buenos días','Buenas tardes','Buenas noches','Hola'], correct: 1 },
+            { question: "Complete: '__ tardes, ¿cómo estás?'", options: ['Buenos','Buenas','Bueno','Buena'], correct: 1 },
+            { question: "Say 'Good night' in Spanish:", options: ['Buenos noches','Buenas noches','Noches buenas','Noches'], correct: 1 }
+        ]
+    },
+    {
+        title: "Farewell Phrases",
+        intro: "How to say goodbye. You'll hear these constantly! 👇",
+        teach: [
+            { emoji: "👋", es: "Hasta luego",  en: "See you later" },
+            { emoji: "📅", es: "Hasta mañana", en: "See you tomorrow" },
+            { emoji: "⏰", es: "Hasta pronto",  en: "See you soon" },
+            { emoji: "👋", es: "Adiós",        en: "Goodbye" }
+        ],
+        questions: [
+            { question: "How do you say 'See you later'?",      options: ['Hasta mañana','Hasta luego','Hasta pronto','Adiós luego'], correct: 1 },
+            { question: "How do you say 'See you tomorrow'?",   options: ['Hasta luego','Hasta pronto','Hasta mañana','Adiós mañana'], correct: 2 },
+            { question: "How do you say 'See you soon'?",       options: ['Hasta luego','Hasta mañana','Hasta pronto','Pronto'], correct: 2 },
+            { question: "What does 'Hasta luego' mean?",        options: ['Goodbye forever','See you later','See you never','Until forever'], correct: 1 },
+            { question: "Complete: 'Adiós, ___!'",              options: ['Hola','Hasta luego','Gracias','Sí'], correct: 1 },
+            { question: "Which is the most common goodbye?",    options: ['Hasta mañana','Adiós','Hasta pronto','Luego'], correct: 1 }
+        ]
+    },
+    {
+        title: "Who You Are",
+        intro: "Words to talk about yourself. Essential for introductions! 👇",
+        teach: [
+            { emoji: "🙋", es: "Yo",     en: "I" },
+            { emoji: "👉", es: "Tú",     en: "You (informal)" },
+            { emoji: "🎩", es: "Usted",  en: "You (formal)" },
+            { emoji: "🆔", es: "Soy",    en: "I am" },
+            { emoji: "📍", es: "Estoy",  en: "I am (right now)" }
+        ],
+        questions: [
+            { question: "What does 'Yo' mean?",                options: ['You','I','He','We'], correct: 1 },
+            { question: "What does 'tú' mean? (informal)",     options: ['I','You','He','They'], correct: 1 },
+            { question: "What does 'soy' mean?",               options: ['You are','I am','He is','We are'], correct: 1 },
+            { question: "What does 'estoy' mean?",             options: ['I have','I am','I want','I go'], correct: 1 },
+            { question: "What does 'usted' mean?",             options: ['You (informal)','You (formal)','He','We'], correct: 1 },
+            { question: "When do you use 'Soy'?",              options: ['Right now','Always true','Never','Yesterday'], correct: 1 },
+            { question: "Yo ___ María (I am María)",           options: ['estoy','soy','estáy','soyo'], correct: 1 }
+        ]
+    },
+    {
+        title: "Saying Your Name",
+        intro: "Tell people who you are and where you're from! 👇",
+        teach: [
+            { emoji: "🏷️", es: "Me llamo",    en: "My name is" },
+            { emoji: "🌍", es: "Soy de",      en: "I am from" },
+            { emoji: "✍️", es: "Mi nombre",   en: "My name" },
+            { emoji: "🆔", es: "Soy",         en: "I am" }
+        ],
+        questions: [
+            { question: "How do you say 'My name is'?",      options: ['Mi llamo','Me llamo','Yo llamo','Tú llamas'], correct: 1 },
+            { question: "What does 'Soy de' mean?",          options: ['I have','I am from','I want','I go to'], correct: 1 },
+            { question: "Complete: 'Me llamo ___'",          options: ['Juan','soy Juan','Juan soy','Juan llamo'], correct: 0 },
+            { question: "How do you say 'I am from Spain'?",  options: ['Soy España','Soy de España','Yo España','Estoy de España'], correct: 1 },
+            { question: "What is YOUR introduction?",         options: ['Adiós, me llamo...','Hola, me llamo...','Gracias, me llamo...','No, me llamo...'], correct: 1 },
+            { question: "Complete: 'Soy de ___'",             options: ['Juan','llamo','Londres','mi'], correct: 2 }
+        ]
+    },
+    {
+        title: "Questions People Ask",
+        intro: "How natives ask about you. These are essential to know! 👇",
+        teach: [
+            { emoji: "💬", es: "¿Cómo estás?",     en: "How are you? (informal)" },
+            { emoji: "🏷️", es: "¿Cómo te llamas?", en: "What's your name?" },
+            { emoji: "🌍", es: "¿De dónde eres?",  en: "Where are you from?" },
+            { emoji: "😎", es: "¿Qué tal?",        en: "What's up?" }
+        ],
+        questions: [
+            { question: "How do you ask 'How are you?' (informal)?", options: ['¿Cómo está usted?','¿Cómo estás?','¿Qué llamas?','¿De dónde vas?'], correct: 1 },
+            { question: "How do you ask 'What is your name?'",       options: ['¿Quién eres?','¿Cómo te llamas?','¿De dónde eres?','¿Qué tal?'], correct: 1 },
+            { question: "How do you ask 'Where are you from?'",      options: ['¿Cómo estás?','¿Qué tal?','¿De dónde eres?','¿Cómo te llamas?'], correct: 2 },
+            { question: "What does '¿Qué tal?' mean?",               options: ['Who are you?','How are you / What\'s up?','Where are you?','When?'], correct: 1 },
+            { question: "When someone asks '¿Cómo estás?', you might say:", options: ['¿Qué tal?','Soy de...','Muy bien','¿Y tú?'], correct: 2 },
+            { question: "Complete the question: '¿___ te llamas?'", options: ['Qué','Cómo','Dónde','De dónde'], correct: 1 }
+        ]
+    },
+    {
+        title: "Full Conversations",
+        intro: "Put it all together! Hold a real Spanish greeting conversation! 👇",
+        teach: [
+            { emoji: "🗣️", es: "¡Hola! Me llamo...",    en: "Hi! My name is..." },
+            { emoji: "😎", es: "Hola, ¿qué tal?",        en: "Hi, what's up?" },
+            { emoji: "🤝", es: "Mucho gusto",            en: "Nice to meet you" },
+            { emoji: "👋", es: "Adiós, hasta luego",     en: "Goodbye, see you later" }
+        ],
+        questions: [
+            { question: "You meet someone. Best greeting?", options: ['Adiós','¡Hola! ¿Qué tal?','Mal','¿Qué tal mañana?'], correct: 1 },
+            { question: "They ask '¿Cómo te llamas?'. You respond:", options: ['Muy bien','Me llamo Juan','¿De dónde?','Adiós'], correct: 1 },
+            { question: "Complete the chat: 'Hola' → '___' → 'Mucho gusto'", options: ['Adiós','Muy bien','Hola, ¿qué tal?','Gracias'], correct: 2 },
+            { question: "How do you ask where someone is from?", options: ['¿Qué tal?','¿De dónde eres?','¿Cómo estás?','¿Quién eres?'], correct: 1 },
+            { question: "End a conversation politely:", options: ['¡Hola!','Adiós, hasta mañana','Gracias, sí','¿Cómo estás?'], correct: 1 },
+            { question: "Natural Spanish greeting flow is:", options: ['Soy Juan','Hola → ¿Qué tal? → Me llamo... → Hasta luego','Gracias Adiós','Mal, no'], correct: 1 }
         ]
     }
 ];
