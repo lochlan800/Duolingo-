@@ -260,6 +260,44 @@ header p {
 .feedback.correct  { background: #e8f5e9; color: #2e7d32; }
 .feedback.incorrect{ background: #ffebee; color: #c62828; }
 
+/* ── Learn screen (vocab cards shown before the quiz) ── */
+.learn-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.learn-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #f6f8ff;
+    border: 2px solid #e7ebff;
+    animation: learnPop 0.35s ease both;
+}
+
+/* Gentle staggered entrance for the cards */
+.learn-card:nth-child(1) { animation-delay: 0.00s; }
+.learn-card:nth-child(2) { animation-delay: 0.05s; }
+.learn-card:nth-child(3) { animation-delay: 0.10s; }
+.learn-card:nth-child(4) { animation-delay: 0.15s; }
+.learn-card:nth-child(5) { animation-delay: 0.20s; }
+.learn-card:nth-child(6) { animation-delay: 0.25s; }
+.learn-card:nth-child(7) { animation-delay: 0.30s; }
+.learn-card:nth-child(8) { animation-delay: 0.35s; }
+
+@keyframes learnPop {
+    0%   { transform: translateY(8px); opacity: 0; }
+    100% { transform: translateY(0);   opacity: 1; }
+}
+
+.learn-emoji { font-size: 24px; width: 30px; text-align: center; flex-shrink: 0; }
+.learn-es    { font-size: 16px; font-weight: 700; color: #4a3fbf; }
+.learn-arrow { color: #aaa; font-weight: 700; margin: 0 2px; }
+.learn-en    { font-size: 15px; color: #555; margin-left: auto; text-align: right; }
+
 /* Session complete screen */
 .completion-screen {
     text-align: center;

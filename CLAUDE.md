@@ -14,8 +14,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The core loop follows a **sequential unlock pattern with mastery levels**:
 1. User starts with only button #1 enabled
-2. Clicking a button opens a modal with that lesson's multiple-choice questions (5-6 each)
-3. Wrong answers are pushed to the end of the queue and retried later
+2. Clicking a button first opens a **Learn screen** (vocab cards teaching that lesson's words) — beginners see the meanings before being quizzed
+3. Pressing "Start lesson →" begins the quiz: a random `QUESTIONS_PER_SESSION` (5) subset of the lesson's pool, with answer options shuffled so replays feel fresh
+4. Wrong answers are pushed to the end of the queue and retried later
 4. Once every question is answered correctly, a "Session Complete" celebration screen appears
 5. Pressing "Finish Session" closes the modal, marks one of the four progress-ring segments around the button, and unlocks the next button (on first completion only)
 6. Replaying a lesson fills additional segments — at 4/4 completions the button shows a trophy in its center plus a star badge
@@ -53,10 +54,12 @@ Core state variables:
 - `nextButtonIndex` (0-9) — Highest unlocked button index; clicking past this is blocked
 - `buttonCompletions` (length-10 array of 0-4) — Per-button mastery count (drives ring/trophy/star)
 - `activeLessonIndex` (0-9 or null) — Which lesson's modal is open
-- `activeQuestionIndex` (number) — Index into the current lesson's `questions` array
+- `activeQuestions` (array) — The prepared session questions (random subset of the pool, each with shuffled options); built fresh each time the quiz starts
+- `activeQuestionIndex` (number) — Index into `activeQuestions`
 - `selectedAnswer` (0-3 or null) — User's answer selection
 - `questionQueue` (array of indices) — Remaining questions to answer in this session; wrong answers get pushed to the end
 - `wrongIndices` (Set of indices) — Tracks which questions the user got wrong (used for "retry" label)
+- `streak` (number) — Consecutive correct answers this session; drives the 🔥 streak indicator and fun feedback
 
 ### Data Structure
 
@@ -64,18 +67,23 @@ Core state variables:
 ```javascript
 {
   title: "Greeting Words",
-  questions: [
+  intro: "Brand new to Spanish? Start here! ...",   // line shown on the Learn screen
+  teach: [                                          // vocab cards taught before the quiz
+    { emoji: "👋", es: "Hola", en: "Hello" },
+    // ... one card per word/phrase to introduce
+  ],
+  questions: [                                      // POOL of questions (7-8 typical)
     {
       question: "How do you say 'Hello'?",
       options: ['Hola', 'Adiós', 'Gracias', 'Sí'],
-      correct: 0  // index of correct answer
+      correct: 0  // index of correct answer in the ORIGINAL options order
     },
-    // ... typically 5-6 questions per lesson
+    // ...
   ]
 }
 ```
 
-Most lessons hold 5-6 questions. The number of questions per lesson is not fixed — `questionQueue` is built from whatever `questions.length` is.
+`questions` is a **pool** — each session randomly picks `QUESTIONS_PER_SESSION` (5) of them and shuffles each question's answer positions (`prepareQuestion`/`buildSessionQuestions`). `correct` always refers to the original order; shuffling recomputes the correct index by value. Pools can be any size ≥ the per-session count.
 
 **SNAKE_POSITIONS array:** String classnames mapped 1:1 to LESSONS:
 - `'pos-center'`, `'pos-right'`, `'pos-far-right'`, `'pos-left'`, `'pos-far-left'`
@@ -87,8 +95,10 @@ Most lessons hold 5-6 questions. The number of questions per lesson is not fixed
    - A `.button-number` span (the lesson number)
    - A `.button-trophy` span (🏆, hidden until 4/4 mastery)
    - `data-index` and `data-completions` attributes
-2. **onButtonClick(i)** — Validates `i <= nextButtonIndex` (already-unlocked buttons can be replayed). Initializes `questionQueue` from the lesson's questions and opens the modal.
-3. **showCurrentQuestion()** — Renders modal title (with retry indicator if applicable), question text, and 4 answer options. Updates the "(N left)" counter.
+2. **onButtonClick(i)** — Validates `i <= nextButtonIndex` (already-unlocked buttons can be replayed), then opens the **Learn screen**.
+3. **showLearnScreen()** — Renders the lesson's `teach` cards in the modal and swaps the action button to "Start lesson →".
+4. **startQuiz()** — Builds `activeQuestions` via `buildSessionQuestions()` (random subset + shuffled options), initializes `questionQueue`, swaps the button to "Check", shows the first question.
+5. **showCurrentQuestion()** — Renders modal title (with retry indicator and 🔥 streak if applicable), question text, and 4 answer options. Updates the "· N left" counter.
 4. **selectAnswer(idx)** — Toggles `.selected` class on the chosen option.
 5. **checkAnswer()** — Validates against `questions[activeQuestionIndex].correct`:
    - Correct: highlights green, removes question from queue, advances after 1100ms
