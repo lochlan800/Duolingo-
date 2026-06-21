@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Duolingo Spanish Greetings** - A single-page web application that teaches Spanish greetings and common phrases through an interactive, gamified learning experience. Users progress through 10 sequential lessons (each with 3 multiple-choice questions) by clicking buttons arranged in a visual "snake path" down the screen. Each lesson can be replayed up to 4 times to "master" it, with visual progress rings showing completion.
+**Duolingo Spanish Greetings** - A single-page web application that teaches Spanish greetings through an interactive, gamified learning experience. The 10 lessons follow a **progressive curriculum** that builds from individual words to full conversational sentences. Users click buttons arranged in a visual "snake path" to start each lesson.
 
 **Key constraint:** No external dependencies, no build process, pure vanilla HTML/CSS/JavaScript.
 
@@ -12,22 +12,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Game Mechanics
 
-The core loop follows a **sequential unlock + retry system**:
+The core loop follows a **sequential unlock pattern with mastery levels**:
 1. User starts with only button #1 enabled
-2. Clicking a button opens a modal with 3 Spanish questions
-3. **Wrong answers get retried at the end** - incorrect questions are pushed to the back of a queue instead of auto-advancing
-4. User must answer every question correctly to complete the lesson
-5. Session Complete screen appears with "Finish Session" button
-6. Clicking "Finish Session" marks the lesson complete (fills 1 segment of the progress ring) and returns to home page
-7. User can retry any unlocked button to fill more segments (up to 4 per button for full mastery)
-8. Progress bar fills based on how many of the 10 buttons have been completed at least once
+2. Clicking a button first opens a **Learn screen** (vocab cards teaching that lesson's words) — beginners see the meanings before being quizzed
+3. Pressing "Start lesson →" begins the quiz: a random `QUESTIONS_PER_SESSION` (5) subset of the lesson's pool, with answer options shuffled so replays feel fresh
+4. Wrong answers are pushed to the end of the queue and retried later
+4. Once every question is answered correctly, a "Session Complete" celebration screen appears
+5. Pressing "Finish Session" closes the modal, marks one of the four progress-ring segments around the button, and unlocks the next button (on first completion only)
+6. Replaying a lesson fills additional segments — at 4/4 completions the button shows a trophy in its center plus a star badge
 
-**Progress Ring System:** Each button displays a 4-segment ring around it (using conic-gradient):
-- Default: light gray/transparent segments
-- 1st completion: 1 segment glows green (top-right)
-- 2nd completion: 2 segments glow (right side)
-- 3rd completion: 3 segments glow (right + bottom)
-- 4th completion: full ring glows green (mastery)
+**Lesson progression (words → sentences):**
+| Button | Title | Focus |
+|--------|-------|-------|
+| 1 | Greeting Words | Single greeting words: Hola, Adiós, Gracias, Sí, Perdón |
+| 2 | Sentence Building Words | Vocabulary: Buenos, días, tardes, noches, hasta, mañana |
+| 3 | Two-Word Phrases | Buenos días, Buenas tardes, Hasta luego, Mucho gusto |
+| 4 | Pronouns & Verbs | Yo, tú, soy, estoy, usted, mi |
+| 5 | Short Phrases | Me llamo, Soy de, Soy de España |
+| 6 | Asking Questions | ¿Cómo estás?, ¿Cómo te llamas?, ¿De dónde eres? |
+| 7 | Quick Responses | Bien gracias, Muy bien, Más o menos |
+| 8 | Combined Greetings | Hola ¿qué tal?, Buenos días ¿cómo estás? |
+| 9 | Introducing Yourself | Hola, me llamo Juan / Mucho gusto, soy María |
+| 10 | Full Greeting Conversations | Complete multi-sentence greetings |
 
 **Snake Path Layout:** 10 colored circular buttons positioned in a winding path using flexbox + padding offsets:
 - Row 1: Center
@@ -44,59 +50,73 @@ The core loop follows a **sequential unlock + retry system**:
 ### State Management (script.js)
 
 Core state variables:
-- `completedCount` (0-10) - Number of lessons completed at least once (unlocks next button)
-- `nextButtonIndex` (0-9) - Next button to unlock; only buttons ≤ this index are clickable
-- `buttonCompletions` (array of 0-4) - Track how many times each button has been completed (for ring segments)
-- `activeLessonIndex` (0-9 or null) - Which lesson's modal is currently open
-- `activeQuestionIndex` (0-2) - Current question index within the lesson
-- `selectedAnswer` (0-3 or null) - User's selected answer option
-- `questionQueue` (array) - Queue of question indices still to be answered (for retry system)
-- `wrongIndices` (Set) - Indices of questions the user got wrong in this attempt (used to show "retry" label)
+- `completedCount` (0-10) — Number of lessons completed at least once (drives progress bar)
+- `nextButtonIndex` (0-9) — Highest unlocked button index; clicking past this is blocked
+- `buttonCompletions` (length-10 array of 0-4) — Per-button mastery count (drives ring/trophy/star)
+- `activeLessonIndex` (0-9 or null) — Which lesson's modal is open
+- `activeQuestions` (array) — The prepared session questions (random subset of the pool, each with shuffled options); built fresh each time the quiz starts
+- `activeQuestionIndex` (number) — Index into `activeQuestions`
+- `selectedAnswer` (0-3 or null) — User's answer selection
+- `questionQueue` (array of indices) — Remaining questions to answer in this session; wrong answers get pushed to the end
+- `wrongIndices` (Set of indices) — Tracks which questions the user got wrong (used for "retry" label)
+- `streak` (number) — Consecutive correct answers this session; drives the 🔥 streak indicator and fun feedback
 
 ### Data Structure
 
 **LESSONS array:** 10 lesson objects, each containing:
 ```javascript
 {
-  title: "Saying Hello",
-  questions: [
+  title: "Greeting Words",
+  intro: "Brand new to Spanish? Start here! ...",   // line shown on the Learn screen
+  teach: [                                          // vocab cards taught before the quiz
+    { emoji: "👋", es: "Hola", en: "Hello" },
+    // ... one card per word/phrase to introduce
+  ],
+  questions: [                                      // POOL of questions (7-8 typical)
     {
-      question: "How do you say 'Hello' in Spanish?",
-      options: ['Hola', 'Adiós', 'Gracias', 'Por favor'],
-      correct: 0  // index of correct answer
+      question: "How do you say 'Hello'?",
+      options: ['Hola', 'Adiós', 'Gracias', 'Sí'],
+      correct: 0  // index of correct answer in the ORIGINAL options order
     },
-    // ... 2 more questions
+    // ...
   ]
 }
 ```
 
+`questions` is a **pool** — each session randomly picks `QUESTIONS_PER_SESSION` (5) of them and shuffles each question's answer positions (`prepareQuestion`/`buildSessionQuestions`). `correct` always refers to the original order; shuffling recomputes the correct index by value. Pools can be any size ≥ the per-session count.
+
 **SNAKE_POSITIONS array:** String classnames mapped 1:1 to LESSONS:
-- 'pos-center', 'pos-right', 'pos-far-right', etc.
+- `'pos-center'`, `'pos-right'`, `'pos-far-right'`, `'pos-left'`, `'pos-far-left'`
 - Used by CSS `.snake-row` class to position buttons via padding
 
 ### Function Flow
 
-1. **buildButtons()** - Creates DOM: iterates over LESSONS, creates rows + buttons, applies snake-position classes and data-completions attribute
-2. **onButtonClick(i)** - Validates that button is unlocked (`i <= nextButtonIndex`), initializes questionQueue, opens first question
-3. **showCurrentQuestion()** - Renders modal with current question + 4 answer options; displays "X left" in title or "retry (X left)" if retrying
-4. **selectAnswer(idx)** - Toggles `.selected` class on answer option
-5. **checkAnswer()** - Validates answer against `questions[activeQuestionIndex].correct`:
-   - **Correct:** Shows "¡Correcto! 🎉", removes from queue, calls `advanceToNextQuestion()`
-   - **Incorrect:** Shows correct answer highlighted, moves question to back of queue, calls `advanceToNextQuestion()`
-6. **advanceToNextQuestion()** - Checks if `questionQueue` is empty:
-   - If empty: calls `showSessionComplete()`
-   - If not: loads next question from queue and calls `showCurrentQuestion()`
-7. **showSessionComplete()** - Displays celebration screen with trophy, lesson title, and green "Finish Session" button
-8. **finishLesson()** - Increments `buttonCompletions[activeLessonIndex]`, updates button's `data-completions` attribute (updates ring), increments `completedCount` and `nextButtonIndex` on first completion only, closes modal
-9. **resetGame()** - Clears all state including `buttonCompletions`, rebuilds buttons, resets progress bar
+1. **buildButtons()** — Iterates `LESSONS`, creates a `.snake-row` per lesson, then a `.lesson-btn`. Each button contains:
+   - A `.button-number` span (the lesson number)
+   - A `.button-trophy` span (🏆, hidden until 4/4 mastery)
+   - `data-index` and `data-completions` attributes
+2. **onButtonClick(i)** — Validates `i <= nextButtonIndex` (already-unlocked buttons can be replayed), then opens the **Learn screen**.
+3. **showLearnScreen()** — Renders the lesson's `teach` cards in the modal and swaps the action button to "Start lesson →".
+4. **startQuiz()** — Builds `activeQuestions` via `buildSessionQuestions()` (random subset + shuffled options), initializes `questionQueue`, swaps the button to "Check", shows the first question.
+5. **showCurrentQuestion()** — Renders modal title (with retry indicator and 🔥 streak if applicable), question text, and 4 answer options. Updates the "· N left" counter.
+4. **selectAnswer(idx)** — Toggles `.selected` class on the chosen option.
+5. **checkAnswer()** — Validates against `questions[activeQuestionIndex].correct`:
+   - Correct: highlights green, removes question from queue, advances after 1100ms
+   - Incorrect: highlights wrong + correct answer, pushes question to end of queue, advances after 1800ms
+6. **advanceToNextQuestion()** — Pulls next index off `questionQueue`. When queue is empty, calls `showSessionComplete()` instead.
+7. **showSessionComplete()** — Replaces modal body with celebration screen (🏆 trophy + lesson title) and swaps the Submit button for "Finish Session".
+8. **finishLesson()** — Restores submit button, increments `buttonCompletions[i]` (capped at 4), updates `data-completions` attribute (drives ring/trophy/star CSS), increments `completedCount`/`nextButtonIndex` only on first completion, updates progress bar, closes modal.
+9. **resetGame()** — Clears all state including `buttonCompletions`, rebuilds buttons, resets progress.
 
 ### CSS Strategy
 
 - **Flexbox layout:** `.snake-row` uses `justify-content: center` + `padding-left`/`padding-right` to offset buttons
-- **4-segment progress ring:** `.lesson-btn::before` uses conic-gradient; different gradients for `[data-completions="1|2|3|4"]`
-- **Color classes:** `.c0` through `.c9` with unique gradient backgrounds
+- **Color classes:** `.c0` through `.c9` with unique gradient backgrounds + colored bottom shadows
+- **Bob animation:** All buttons run `@keyframes bob` (1.6s) — a double-bounce up to -14px with a slight scale. Each row has a staggered `animation-delay` (0s through 1.8s) so they don't move in unison. Hover/active stop the animation and apply a transform.
+- **Progress rings:** `.lesson-btn::before` is a `conic-gradient` ring sized 96×96 around the 80×80 button. Selectors like `.lesson-btn[data-completions="1"]::before` fill 90°/180°/270°/360° of the ring in green based on completion count.
+- **Trophy in center:** When `data-completions="4"`, CSS hides `.button-number` and shows `.button-trophy` (🏆) instead.
+- **Star badge:** When `data-completions="4"`, `.lesson-btn::after` shows ⭐ at the top-right with `starPop` (entry) + `starWiggle` (continuous) animations.
 - **Modal visibility:** Hidden by inline `style="display:none"` + toggled via `.show` class and JS `display: flex`
-- **Session complete screen:** Uses `.completion-screen` container with `.trophy` animation (bounce), `.completion-title`, `.completion-subtitle`
 - **Responsive:** Breakpoint at 480px reduces button size and adjusts padding offsets
 
 ### Why Flexbox Over Grid?
@@ -119,32 +139,33 @@ python3 -m http.server 8000
 
 ### Manual Testing Checklist
 
-- [ ] 10 colored buttons visible in snake path
-- [ ] Only button #1 clickable initially; buttons 2-10 show "Click button 1 next!"
-- [ ] Clicking button #1 opens modal with "Saying Hello" lesson (3 left)
-- [ ] All 3 questions display with 4 options each
-- [ ] Getting a question wrong: shows correct answer, says "We'll come back to this one"
-- [ ] Wrong question appears again at end with "— retry (X left)" label
-- [ ] After all correct answers, "🎉 Session Complete!" screen appears
-- [ ] "Finish Session" button returns to home page
-- [ ] Button #1 now shows 1 green segment in ring; button #2 is unlocked
-- [ ] Can click button #1 again to retry and fill 2nd segment
-- [ ] Progress bar filled to 10% after first completion of lesson 1
-- [ ] Retrying button #1 a 3rd and 4th time fills remaining segments
-- [ ] Reset button clears all progress and button completions
-- [ ] Mobile (480px viewport) - buttons shrink and padding adjusts, ring scales proportionally
+- [ ] 10 colored buttons visible in winding snake path
+- [ ] All buttons gently bob with staggered timing
+- [ ] Only button #1 clickable initially
+- [ ] Clicking button #1 opens modal titled "Greeting Words"
+- [ ] Each question displays 4 options; selecting + submitting works
+- [ ] Wrong answers show "We'll come back to this one!" and reappear at the end of the queue (with "retry" label)
+- [ ] Once all questions correct, the celebration screen appears with a trophy + "Finish Session" button
+- [ ] Finishing fills 1/4 of the progress ring around the button and unlocks button #2
+- [ ] Replaying a lesson fills additional ring segments
+- [ ] At 4/4 completions the button shows a centered 🏆 trophy and a corner ⭐ star
+- [ ] Progress bar fills to 10% after first lesson, 100% after all 10
+- [ ] Reset button clears all state including completion counts
+- [ ] Mobile (480px viewport) — buttons shrink and padding adjusts
 
 ### Common Tasks
 
-**Add a new lesson:**
-1. Insert new object into `LESSONS` array (position N)
-2. Insert matching position class into `SNAKE_POSITIONS` at index N
-3. Keep arrays in sync: `LESSONS[i]` always corresponds to `SNAKE_POSITIONS[i]`
+**Modify lesson content:**
+- Edit the `questions` array of the relevant lesson in `LESSONS`
+- Each question needs `question`, `options` (array of 4), and `correct` (0-3)
+- Lessons can have any number of questions (5-6 is typical)
 
-**Modify a lesson's questions:**
-- Edit the `questions` array of that lesson object
-- Keep 3 questions per lesson; ensure `correct` index matches one of the 4 options
-- Note: Users who got a question wrong will see it again at the end
+**Add a new lesson:**
+1. Insert new object into `LESSONS` array
+2. Insert matching position class into `SNAKE_POSITIONS` at the same index
+3. Update `buttonCompletions` initial array length (add another `0`)
+4. Add a `.lesson-btn.cN` color class in CSS for the new index
+5. Add a staggered animation delay rule for `.snake-row:nth-of-type(N) .lesson-btn`
 
 **Change button colors:**
 - Edit `.lesson-btn.cN` CSS rules in style.css (e.g., `.lesson-btn.c0` for button 1)
@@ -154,13 +175,13 @@ python3 -m http.server 8000
 - Modify `SNAKE_POSITIONS` array values (e.g., change some 'pos-right' to 'pos-center')
 - Adjust `.snake-row.pos-right { padding-left: 80px; }` values in CSS if needed
 
-**Adjust progress ring sizing:**
-- Ring size and offset are in `.lesson-btn::before` CSS (currently 96px wide, -8px offset)
-- Modify `width: 96px; height: 96px;` and `top: -8px; left: -8px;` to change ring appearance
-
 **Fix modal positioning (if it leaks onto page):**
 - Ensure `.modal` has `display: none` in inline style AND CSS
 - Check that `closeQuestion()` removes `.show` class and sets `display = 'none'`
+
+**Tweak the bob animation:**
+- Edit `@keyframes bob` in style.css to change the bounce height/scale
+- Edit the `1.6s ease-in-out infinite` shorthand on `.lesson-btn` to change speed
 
 ## Deployment
 
@@ -168,7 +189,7 @@ python3 -m http.server 8000
 
 **Branch:** `main` contains production code
 
-**Cache busting:** CSS/JS links include query params (`style.css?v=8`, `script.js?v=8`). Increment these when pushing changes so browsers fetch fresh files.
+**Cache busting:** CSS/JS links include query params (currently `style.css?v=12`, `script.js?v=11`). **Increment these whenever you push changes** so browsers fetch fresh files.
 
 ```bash
 git add index.html style.css script.js
@@ -181,14 +202,11 @@ git push origin main
 
 ## Implementation Notes
 
-### Why wrong answers get retried instead of auto-advancing?
-Duolingo-style learning keeps momentum while ensuring mastery. User sees the correct answer highlighted, then the question gets re-queued. This reinforces weak areas without stopping the lesson flow.
+### Why incorrect answers re-queue instead of failing the lesson?
+Duolingo-style lesson reinforces learning. Wrong answers go to the end of the queue and the user has to answer them correctly before the lesson completes. The modal title shows "(N left)" plus a "retry" tag for repeated questions.
 
-### Session Complete screen design
-After all 3 questions are answered correctly (including any retries), the modal transforms into a celebration screen rather than auto-closing. User explicitly clicks "Finish Session" to return home. This satisfying UX moment reinforces achievement and unlocks the next button.
-
-### Why allow retrying completed buttons?
-The 4-segment ring system lets users "master" lessons by replaying them. This creates multiple engagement opportunities and lets learners self-assess readiness before moving forward.
+### Why can already-unlocked buttons be re-clicked?
+Replaying a lesson is how the user fills the 4 mastery segments around a button. The check is `i > nextButtonIndex` (locked), not `i !== nextButtonIndex` (forced linear).
 
 ### What's NOT implemented?
 - Persistence (localStorage would be needed to save progress across refreshes)
@@ -200,28 +218,25 @@ The 4-segment ring system lets users "master" lessons by replaying them. This cr
 These are potential enhancements but not required for MVP.
 
 ### Known Issues
-- No protection against rapid clicks; clicking multiple times before modal fully renders may cause state issues (add debouncing if needed)
+- No protection against rapid clicks; clicking multiple times before modal closes may cause state issues (add debouncing if needed)
 - Mobile layout squishes smaller buttons but remains functional
-- Progress resets on page reload (by design; localStorage optional for persistence)
-- Ring segments may overlap on very small screens; adjust offsets in CSS if needed
+- Progress resets on page reload (by design; localStorage optional)
 
 ## Files to Know
 
 | File | Purpose |
 |------|---------|
-| `index.html` | Markup: header, snake-path container, progress bar, question modal, session complete screen |
-| `script.js` | Game logic: LESSONS data, state variables, queue/retry system, completion tracking |
-| `style.css` | Layout: flexbox rows, button colors, 4-segment progress rings, modal styling, animations |
-| `.git/` | Version control; current branch: main |
+| `index.html` | Markup: header, snake-path container, progress bar, modal form |
+| `script.js` | Game logic: LESSONS data, state variables, core functions |
+| `style.css` | Layout: flexbox rows, button colors, ring/trophy/star, modal styling, animations |
 
 ## Session Context
 
-Major evolution (most recent first):
-- Added 4-segment progress ring around each button; adjusted sizing to prevent overlaps
-- Users can now retry lessons to fill more segments (up to 4 per button)
-- Implemented wrong-answer retry queue: incorrect answers get re-queued at end of lesson
-- Added Session Complete screen with "Finish Session" button before returning home
-- Buttons unlock sequentially, but all unlocked buttons are replayable
-- Fixed layout with flexbox + padding instead of fragile absolute positioning
-- Added multi-question lessons (3 questions per button)
-- Added cache-busting query params to prevent stale CSS serving
+Recent feature additions:
+- **Lesson progression rewrite** — Lessons now teach words first, then 2-word phrases, then short phrases, then full conversational greetings by lesson 10
+- **Trophy in button center** — `data-completions="4"` swaps the lesson number for a 🏆 trophy
+- **Star badge** — Star (⭐) appears at top-right of fully-mastered buttons with pop + wiggle animations
+- **Bob animation** — Buttons bounce gently with staggered timing for life and energy
+- **4-segment progress ring** — Conic-gradient ring fills based on completion count (0-4)
+- **Retry queue** — Wrong answers go back into the question queue until answered correctly
+- **Session complete screen** — Celebration screen with "Finish Session" button before the modal closes
