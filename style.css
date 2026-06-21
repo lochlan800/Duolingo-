@@ -59,7 +59,7 @@ header p {
     overflow: visible;
 }
 
-/* Aurora glow effect behind buttons - flowing multicolor gradient */
+/* Aurora glow effect - flowing gas/plasma with independent color blobs */
 .snake-path::before {
     content: '';
     position: absolute;
@@ -68,20 +68,16 @@ header p {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: conic-gradient(
-        hsl(220, 100%, 50%) 0deg,
-        hsl(260, 100%, 50%) 120deg,
-        hsl(180, 100%, 45%) 240deg,
-        hsl(220, 100%, 50%) 360deg
-    );
+    background:
+        radial-gradient(circle at 30% 40%, hsl(220, 100%, 50%), transparent 45%),
+        radial-gradient(circle at 70% 60%, hsl(260, 100%, 50%), transparent 45%),
+        radial-gradient(circle at 50% 80%, hsl(180, 100%, 45%), transparent 45%);
+    background-size: 200% 200%;
     filter: blur(50px);
     opacity: 0.7;
     z-index: 0;
     pointer-events: none;
-    animation:
-        auroraRotate 8s linear infinite,
-        auroraShift 5.7s ease-in-out infinite,
-        auroraBreathePulse 4s ease-in-out infinite;
+    animation: fluidFlow 12s ease-in-out infinite;
 }
 
 .snake-row {
@@ -134,29 +130,14 @@ header p {
     50%      { transform: translate(-50%, -50%) rotate(10deg) scale(1.08); }
 }
 
-/* Aurora rotating gradient - colors flow around continuously */
-@keyframes auroraRotate {
-    0%   { transform: translate(-50%, -50%) rotate(0deg); }
-    100% { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-/* Aurora drifts position unpredictably for organic motion */
-@keyframes auroraShift {
-    0%   { translate: 0 0; }
-    20%  { translate: 12px -8px; }
-    40%  { translate: -10px 14px; }
-    60%  { translate: 15px 6px; }
-    80%  { translate: -8px -12px; }
-    100% { translate: 0 0; }
-}
-
-/* Aurora breathes and pulses for alive effect */
-@keyframes auroraBreathePulse {
-    0%   { opacity: 0.6; filter: blur(48px); }
-    25%  { opacity: 0.75; filter: blur(52px); }
-    50%  { opacity: 0.8; filter: blur(54px); }
-    75%  { opacity: 0.75; filter: blur(52px); }
-    100% { opacity: 0.6; filter: blur(48px); }
+/* Fluid gas aurora - color blobs drift independently like plasma */
+@keyframes fluidFlow {
+    0%   { background-position: 0% 0%, 100% 100%, 50% 50%; }
+    20%  { background-position: 15% 25%, 70% 60%, 35% 70%; }
+    40%  { background-position: 30% 10%, 50% 80%, 60% 30%; }
+    60%  { background-position: 10% 50%, 85% 20%, 40% 50%; }
+    80%  { background-position: 25% 35%, 65% 70%, 70% 60%; }
+    100% { background-position: 0% 0%, 100% 100%, 50% 50%; }
 }
 
 /* Stagger the bob so they don't all move together */
