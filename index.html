@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Duolingo - Spanish Greetings</title>
-    <link rel="stylesheet" href="style.css?v=21">
+    <link rel="stylesheet" href="style.css?v=22">
 </head>
 <body>
     <div class="container">
@@ -37,6 +37,24 @@
             </div>
             <div class="modal-body">
                 <p id="questionText" class="question-text"></p>
+
+                <!-- Recording UI for speech questions -->
+                <div id="recordingContainer" style="display:none;">
+                    <p id="pronunciationPrompt" class="pronunciation-prompt"></p>
+                    <p id="englishHint" class="english-hint"></p>
+
+                    <div class="recording-controls">
+                        <button id="recordBtn" class="record-btn" onclick="startRecording()">🎤 Record</button>
+                        <button id="stopBtn" class="stop-btn" style="display:none;" onclick="stopRecording()">⏹ Stop</button>
+                    </div>
+
+                    <canvas id="frequencyCanvas" class="frequency-canvas" width="300" height="100"></canvas>
+                    <p id="frequencyLabel" class="frequency-label">Ready to record...</p>
+
+                    <audio id="recordingPlayback" class="recording-playback" controls></audio>
+                </div>
+
+                <!-- Multiple choice answers -->
                 <div id="answersContainer" class="answers-container"></div>
                 <p id="feedback" class="feedback"></p>
             </div>
@@ -46,6 +64,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=15"></script>
+    <script src="script.js?v=16"></script>
 </body>
 </html>

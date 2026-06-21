@@ -19,9 +19,12 @@ const LESSONS = [
         questions: [
             { question: "How do you say 'Hello'?",      options: ['Hola','Adiós','Gracias','Sí'], correct: 0 },
             { question: "What does 'Adiós' mean?",      options: ['Hello','Goodbye','Thanks','Sorry'], correct: 1 },
+            { type: "speech", question: "Pronounce this word:", spanish_prompt: "Hola", english_meaning: "Hello", expected_keywords: ["hola"], hint: "Say it like 'OH-lah'" },
             { question: "How do you say 'Thank you'?",  options: ['Hola','Gracias','Sí','Perdón'], correct: 1 },
+            { type: "speech", question: "Pronounce this word:", spanish_prompt: "Adiós", english_meaning: "Goodbye", expected_keywords: ["adiós", "adios"], hint: "Say it like 'ah-dee-OHS'" },
             { question: "Which word means 'Yes'?",      options: ['No','Sí','Hola','Gracias'], correct: 1 },
             { question: "What does 'Por favor' mean?",  options: ['Thank you','Please','Sorry','Hello'], correct: 1 },
+            { type: "speech", question: "Pronounce this word:", spanish_prompt: "Gracias", english_meaning: "Thank you", expected_keywords: ["gracias"], hint: "Say it like 'GRAH-see-ahs'" },
             { question: "How do you say 'No'?",         options: ['Sí','No','Perdón','Hola'], correct: 1 },
             { question: "Complete the greeting: 'Hola, ___'", options: ['Adiós','Gracias','Sí','Hola'], correct: 3 }
         ]
@@ -38,8 +41,10 @@ const LESSONS = [
         ],
         questions: [
             { question: "How do you say 'Very well'?",   options: ['Muy mal','Muy bien','Más o menos','No bien'], correct: 1 },
+            { type: "speech", question: "Pronounce this phrase:", spanish_prompt: "Muy bien", english_meaning: "Very well", expected_keywords: ["muy bien"], hint: "Say it like 'moo-ee bee-EN'" },
             { question: "What does 'Más o menos' mean?", options: ['Very well','So-so','Terrible','Excellent'], correct: 1 },
             { question: "What does 'Mal' mean?",         options: ['Good','Bad','Great','Tired'], correct: 1 },
+            { type: "speech", question: "Pronounce this word:", spanish_prompt: "Bien", english_meaning: "Good/Well", expected_keywords: ["bien"], hint: "Say it like 'bee-EN'" },
             { question: "When someone says 'Hola', you can respond:", options: ['Adiós','Muy bien','Gracias','No'], correct: 1 },
             { question: "What does 'Bien' mean?",        options: ['Bad','Good/Well','Never','Always'], correct: 1 },
             { question: "Which response is enthusiastic?", options: ['Mal','Más o menos','Muy bien','Adiós'], correct: 2 }
@@ -226,6 +231,217 @@ let questionQueue = [];   // queue of question indices still to answer
 let wrongIndices = new Set();   // question indices that the user got wrong
 let streak = 0;   // consecutive correct answers in the current session
 
+// Speech recognition state
+let recordedAudio = null;
+let isRecording = false;
+let mediaRecorder = null;
+let audioContext = null;
+let analyser = null;
+let recognitionResults = null;
+
+// ── Speech Recognition Functions ──
+async function initializeAudioAPIs() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 2048;
+
+        const microphone = audioContext.createMediaStreamSource(stream);
+        microphone.connect(analyser);
+
+        mediaRecorder = new MediaRecorder(stream);
+        let chunks = [];
+        mediaRecorder.ondataavailable = (e) => {
+            chunks.push(e.data);
+        };
+        mediaRecorder.onstop = () => {
+            recordedAudio = new Blob(chunks, { type: 'audio/wav' });
+            chunks = [];
+        };
+
+        return true;
+    } catch (err) {
+        alert('Microphone access denied or not available');
+        return false;
+    }
+}
+
+function startRecording() {
+    if (!mediaRecorder) {
+        initializeAudioAPIs().then(() => {
+            if (mediaRecorder) actuallyStartRecording();
+        });
+    } else {
+        actuallyStartRecording();
+    }
+}
+
+function actuallyStartRecording() {
+    mediaRecorder.start();
+    isRecording = true;
+    recordedAudio = null;
+
+    document.getElementById('recordBtn').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'inline-block';
+    document.getElementById('frequencyLabel').textContent = '🎙️ Recording... speak now...';
+
+    visualizeFrequency();
+}
+
+function stopRecording() {
+    if (!mediaRecorder) return;
+
+    mediaRecorder.stop();
+    isRecording = false;
+
+    document.getElementById('recordBtn').style.display = 'inline-block';
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('frequencyLabel').textContent = '✓ Recording complete';
+
+    setTimeout(() => {
+        if (recordedAudio) {
+            const audioUrl = URL.createObjectURL(recordedAudio);
+            document.getElementById('recordingPlayback').src = audioUrl;
+        }
+    }, 100);
+}
+
+function visualizeFrequency() {
+    if (!isRecording || !analyser) return;
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(dataArray);
+
+    const canvas = document.getElementById('frequencyCanvas');
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#f5f5f5';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const barWidth = (canvas.width / dataArray.length) * 2.5;
+    let barHeight, x = 0;
+
+    for (let i = 0; i < dataArray.length; i++) {
+        barHeight = (dataArray[i] / 255) * canvas.height;
+        const hue = 220 + (i / dataArray.length) * 40;
+        ctx.fillStyle = `hsl(${hue}, 100%, ${50 + (barHeight/canvas.height)*30}%)`;
+        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+        x += barWidth + 1;
+    }
+
+    requestAnimationFrame(visualizeFrequency);
+}
+
+function checkSpeechPronunciation() {
+    const currentQ = activeQuestions[activeQuestionIndex];
+
+    if (!recordedAudio) {
+        showFeedback('Please record yourself first!', false);
+        return;
+    }
+
+    // Use Web Speech API to recognize speech from the recording
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        showFeedback('Speech recognition not supported in your browser', false);
+        return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.language = 'es-ES';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript.toLowerCase();
+        }
+        recognitionResults = transcript;
+        validatePronunciation(transcript, currentQ.expected_keywords);
+    };
+
+    recognition.onerror = (event) => {
+        showFeedback(`Speech error: ${event.error}. Try again!`, false);
+    };
+
+    recognition.onend = () => {
+        if (!recognitionResults) {
+            showFeedback('Could not understand audio. Try again!', false);
+        }
+    };
+
+    document.getElementById('frequencyLabel').textContent = '🔍 Analyzing pronunciation...';
+    recognition.start();
+
+    // Play back the recording to analyze it
+    const audioUrl = URL.createObjectURL(recordedAudio);
+    const audio = new Audio(audioUrl);
+    audio.play();
+}
+
+function validatePronunciation(transcript, expectedKeywords) {
+    const transcriptLower = transcript.toLowerCase().trim();
+    const isCorrect = expectedKeywords.some(keyword =>
+        transcriptLower.includes(keyword.toLowerCase().trim())
+    );
+
+    if (isCorrect) {
+        showFeedback(`Perfect! You said: "${transcript}" ✓`, true);
+        streak++;
+        questionQueue = questionQueue.filter(i => i !== activeQuestionIndex);
+        setTimeout(advanceToNextQuestion, 1100);
+    } else {
+        const expected = expectedKeywords[0];
+        showFeedback(`Not quite. Try saying "${expected}" again!`, false);
+        questionQueue.push(activeQuestionIndex);
+        wrongIndices.add(activeQuestionIndex);
+        streak = 0;
+        setTimeout(advanceToNextQuestion, 1800);
+    }
+}
+
+function showSpeechQuestion(q) {
+    // Hide multiple choice, show recording UI
+    document.getElementById('recordingContainer').style.display = 'block';
+    document.getElementById('answersContainer').style.display = 'none';
+
+    document.getElementById('pronunciationPrompt').textContent = q.spanish_prompt;
+    let hint = `(${q.english_meaning})`;
+    if (q.hint) hint += ` - Hint: ${q.hint}`;
+    document.getElementById('englishHint').textContent = hint;
+
+    // Reset recording controls
+    recordedAudio = null;
+    document.getElementById('recordBtn').style.display = 'inline-block';
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('frequencyLabel').textContent = 'Ready to record...';
+    document.getElementById('recordingPlayback').src = '';
+
+    const feedback = document.getElementById('feedback');
+    feedback.textContent = '';
+    feedback.className = 'feedback';
+
+    // Update submit button
+    const submitBtn = document.querySelector('.submit-btn');
+    submitBtn.textContent = 'Check Pronunciation';
+    submitBtn.onclick = checkSpeechAnswer;
+    submitBtn.classList.add('finish-btn');
+
+    const modal = document.getElementById('questionModal');
+    modal.style.display = 'flex';
+    modal.classList.add('show');
+}
+
+function checkSpeechAnswer() {
+    if (!recordedAudio) {
+        showFeedback('Please record yourself first!', false);
+        return;
+    }
+    checkSpeechPronunciation();
+}
+
 // Load progress from localStorage on page load
 function loadProgress() {
     const saved = localStorage.getItem('duolingoProgress');
@@ -378,6 +594,16 @@ function showCurrentQuestion() {
         ? `${lesson.title} — retry · ${remaining} left${fire}`
         : `${lesson.title} · ${remaining} left${fire}`;
     document.getElementById('questionTitle').textContent = label;
+
+    // Check if this is a speech question
+    if (q.type === 'speech') {
+        showSpeechQuestion(q);
+        return;
+    }
+
+    // Multiple choice question
+    document.getElementById('recordingContainer').style.display = 'none';
+    document.getElementById('answersContainer').style.display = 'flex';
     document.getElementById('questionText').textContent = q.question;
     document.getElementById('feedback').textContent = '';
     document.getElementById('feedback').className = 'feedback';
@@ -394,6 +620,13 @@ function showCurrentQuestion() {
     });
 
     selectedAnswer = null;
+
+    // Update submit button for multiple choice
+    const submitBtn = document.querySelector('.submit-btn');
+    submitBtn.textContent = 'Check';
+    submitBtn.onclick = checkAnswer;
+    submitBtn.classList.remove('finish-btn');
+
     const modal = document.getElementById('questionModal');
     modal.style.display = 'flex';
     modal.classList.add('show');
