@@ -171,17 +171,17 @@ header p {
     pointer-events: none;
 }
 
-/* Lesson button colors — glossy spheres: radial highlight top-left + inset shading + colored 3D base */
-.lesson-btn.c0 { background: radial-gradient(circle at 33% 27%, #FF9D9D, #FF5252); box-shadow: 0 6px 0 #c0392b, 0 9px 13px rgba(0,0,0,0.18), inset 0 5px 9px rgba(255,255,255,0.5), inset 0 -9px 12px rgba(0,0,0,0.22); }
-.lesson-btn.c1 { background: radial-gradient(circle at 33% 27%, #FFB27E, #FF7A3D); box-shadow: 0 6px 0 #d35400, 0 9px 13px rgba(0,0,0,0.18), inset 0 5px 9px rgba(255,255,255,0.5), inset 0 -9px 12px rgba(0,0,0,0.22); }
-.lesson-btn.c2 { background: radial-gradient(circle at 33% 27%, #FFE680, #FFC300); box-shadow: 0 6px 0 #b8860b, 0 9px 13px rgba(0,0,0,0.18), inset 0 5px 9px rgba(255,255,255,0.5), inset 0 -9px 12px rgba(0,0,0,0.22); }
-.lesson-btn.c3 { background: radial-gradient(circle at 33% 27%, #95D89E, #4CAF50); box-shadow: 0 6px 0 #2e7d32, 0 9px 13px rgba(0,0,0,0.18), inset 0 5px 9px rgba(255,255,255,0.5), inset 0 -9px 12px rgba(0,0,0,0.22); }
-.lesson-btn.c4 { background: radial-gradient(circle at 33% 27%, #8FC4FF, #1E90FF); box-shadow: 0 6px 0 #1565c0, 0 9px 13px rgba(0,0,0,0.18), inset 0 5px 9px rgba(255,255,255,0.5), inset 0 -9px 12px rgba(0,0,0,0.22); }
-.lesson-btn.c5 { background: radial-gradient(circle at 33% 27%, #BC8AE6, #7B2CBF); box-shadow: 0 6px 0 #4a148c, 0 9px 13px rgba(0,0,0,0.18), inset 0 5px 9px rgba(255,255,255,0.5), inset 0 -9px 12px rgba(0,0,0,0.22); }
-.lesson-btn.c6 { background: radial-gradient(circle at 33% 27%, #FF8FC4, #FF1493); box-shadow: 0 6px 0 #ad1457, 0 9px 13px rgba(0,0,0,0.18), inset 0 5px 9px rgba(255,255,255,0.5), inset 0 -9px 12px rgba(0,0,0,0.22); }
-.lesson-btn.c7 { background: radial-gradient(circle at 33% 27%, #7FE3F2, #00B4D8); box-shadow: 0 6px 0 #006978, 0 9px 13px rgba(0,0,0,0.18), inset 0 5px 9px rgba(255,255,255,0.5), inset 0 -9px 12px rgba(0,0,0,0.22); }
-.lesson-btn.c8 { background: radial-gradient(circle at 33% 27%, #FFC074, #FB8500); box-shadow: 0 6px 0 #bf360c, 0 9px 13px rgba(0,0,0,0.18), inset 0 5px 9px rgba(255,255,255,0.5), inset 0 -9px 12px rgba(0,0,0,0.22); }
-.lesson-btn.c9 { background: radial-gradient(circle at 33% 27%, #7FF0C4, #00D084); box-shadow: 0 6px 0 #00695c, 0 9px 13px rgba(0,0,0,0.18), inset 0 5px 9px rgba(255,255,255,0.5), inset 0 -9px 12px rgba(0,0,0,0.22); }
+/* Lesson button colors — flat solid colors with a simple colored 3D base */
+.lesson-btn.c0 { background: #FF5252; box-shadow: 0 6px 0 #c0392b; }
+.lesson-btn.c1 { background: #FF7A3D; box-shadow: 0 6px 0 #d35400; }
+.lesson-btn.c2 { background: #FFC300; box-shadow: 0 6px 0 #b8860b; }
+.lesson-btn.c3 { background: #4CAF50; box-shadow: 0 6px 0 #2e7d32; }
+.lesson-btn.c4 { background: #1E90FF; box-shadow: 0 6px 0 #1565c0; }
+.lesson-btn.c5 { background: #7B2CBF; box-shadow: 0 6px 0 #4a148c; }
+.lesson-btn.c6 { background: #FF1493; box-shadow: 0 6px 0 #ad1457; }
+.lesson-btn.c7 { background: #00B4D8; box-shadow: 0 6px 0 #006978; }
+.lesson-btn.c8 { background: #FB8500; box-shadow: 0 6px 0 #bf360c; }
+.lesson-btn.c9 { background: #00D084; box-shadow: 0 6px 0 #00695c; }
 
 /* ── Progress ── */
 .progress { margin: 20px 0; }
