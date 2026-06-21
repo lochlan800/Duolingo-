@@ -508,6 +508,11 @@ function shuffled(arr) {
 
 // Shuffle a question's options and keep the correct index pointing at the right answer
 function prepareQuestion(q) {
+    // Speech questions don't have options to shuffle
+    if (q.type === 'speech') {
+        return q;
+    }
+
     const correctValue = q.options[q.correct];
     const options = shuffled(q.options);
     return { question: q.question, options, correct: options.indexOf(correctValue) };
