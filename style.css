@@ -171,17 +171,9 @@ header p {
     pointer-events: none;
 }
 
-/* Lesson button colors — flat solid colors with a simple colored 3D base */
-.lesson-btn.c0 { background: #FF5252; box-shadow: 0 6px 0 #c0392b; }
-.lesson-btn.c1 { background: #FF7A3D; box-shadow: 0 6px 0 #d35400; }
-.lesson-btn.c2 { background: #FFC300; box-shadow: 0 6px 0 #b8860b; }
-.lesson-btn.c3 { background: #4CAF50; box-shadow: 0 6px 0 #2e7d32; }
-.lesson-btn.c4 { background: #1E90FF; box-shadow: 0 6px 0 #1565c0; }
-.lesson-btn.c5 { background: #7B2CBF; box-shadow: 0 6px 0 #4a148c; }
-.lesson-btn.c6 { background: #FF1493; box-shadow: 0 6px 0 #ad1457; }
-.lesson-btn.c7 { background: #00B4D8; box-shadow: 0 6px 0 #006978; }
-.lesson-btn.c8 { background: #FB8500; box-shadow: 0 6px 0 #bf360c; }
-.lesson-btn.c9 { background: #00D084; box-shadow: 0 6px 0 #00695c; }
+/* Lesson button colors — section-based coloring */
+.lesson-btn.section1 { background: #FF5252; box-shadow: 0 6px 0 #c0392b; }
+.lesson-btn.section2 { background: #7B2CBF; box-shadow: 0 6px 0 #4a148c; }
 
 /* ── Progress ── */
 .progress { margin: 20px 0; }

@@ -250,7 +250,8 @@ function buildButtons() {
         row.className = `snake-row ${SNAKE_POSITIONS[i]}`;
 
         const btn = document.createElement('button');
-        btn.className = `lesson-btn c${i}`;
+        const sectionClass = i < 5 ? 'section1' : 'section2';
+        btn.className = `lesson-btn ${sectionClass}`;
         btn.dataset.index = i;
         btn.dataset.completions = buttonCompletions[i];
         btn.title = LESSONS[i].title;
