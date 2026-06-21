@@ -59,7 +59,7 @@ header p {
     overflow: visible;
 }
 
-/* Aurora glow effect behind buttons */
+/* Aurora glow effect behind buttons - flowing multicolor gradient */
 .snake-path::before {
     content: '';
     position: absolute;
@@ -68,12 +68,17 @@ header p {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: radial-gradient(circle, hsl(220, 100%, 50%), hsl(220, 100%, 30%) 70%, transparent 100%);
+    background: conic-gradient(
+        hsl(220, 100%, 50%) 0deg,
+        hsl(260, 100%, 50%) 120deg,
+        hsl(180, 100%, 45%) 240deg,
+        hsl(220, 100%, 50%) 360deg
+    );
     filter: blur(50px);
     opacity: 0.7;
     z-index: 0;
     pointer-events: none;
-    animation: auroraFlow 5s ease-in-out infinite, auroraColors 5s ease-in-out infinite;
+    animation: auroraRotate 8s linear infinite;
 }
 
 .snake-row {
@@ -126,19 +131,10 @@ header p {
     50%      { transform: translate(-50%, -50%) rotate(10deg) scale(1.08); }
 }
 
-/* Aurora glow wave motion */
-@keyframes auroraFlow {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-    50%      { transform: translate(-50%, -60%) scale(1.05); }
-}
-
-/* Aurora color cycling through blue → purple → cyan → blue */
-@keyframes auroraColors {
-    0%   { background: radial-gradient(circle, hsl(220, 100%, 50%), hsl(220, 100%, 30%) 70%, transparent 100%); }
-    25%  { background: radial-gradient(circle, hsl(260, 100%, 50%), hsl(260, 100%, 30%) 70%, transparent 100%); }
-    50%  { background: radial-gradient(circle, hsl(180, 100%, 45%), hsl(180, 100%, 25%) 70%, transparent 100%); }
-    75%  { background: radial-gradient(circle, hsl(220, 100%, 50%), hsl(220, 100%, 30%) 70%, transparent 100%); }
-    100% { background: radial-gradient(circle, hsl(220, 100%, 50%), hsl(220, 100%, 30%) 70%, transparent 100%); }
+/* Aurora rotating gradient - colors flow around continuously */
+@keyframes auroraRotate {
+    0%   { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 /* Stagger the bob so they don't all move together */
