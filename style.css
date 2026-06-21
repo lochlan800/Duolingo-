@@ -78,7 +78,10 @@ header p {
     opacity: 0.7;
     z-index: 0;
     pointer-events: none;
-    animation: auroraRotate 8s linear infinite;
+    animation:
+        auroraRotate 8s linear infinite,
+        auroraShift 5.7s ease-in-out infinite,
+        auroraBreathePulse 4s ease-in-out infinite;
 }
 
 .snake-row {
@@ -135,6 +138,25 @@ header p {
 @keyframes auroraRotate {
     0%   { transform: translate(-50%, -50%) rotate(0deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Aurora drifts position unpredictably for organic motion */
+@keyframes auroraShift {
+    0%   { translate: 0 0; }
+    20%  { translate: 12px -8px; }
+    40%  { translate: -10px 14px; }
+    60%  { translate: 15px 6px; }
+    80%  { translate: -8px -12px; }
+    100% { translate: 0 0; }
+}
+
+/* Aurora breathes and pulses for alive effect */
+@keyframes auroraBreathePulse {
+    0%   { opacity: 0.6; filter: blur(48px); }
+    25%  { opacity: 0.75; filter: blur(52px); }
+    50%  { opacity: 0.8; filter: blur(54px); }
+    75%  { opacity: 0.75; filter: blur(52px); }
+    100% { opacity: 0.6; filter: blur(48px); }
 }
 
 /* Stagger the bob so they don't all move together */
