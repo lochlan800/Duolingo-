@@ -226,6 +226,27 @@ let questionQueue = [];   // queue of question indices still to answer
 let wrongIndices = new Set();   // question indices that the user got wrong
 let streak = 0;   // consecutive correct answers in the current session
 
+// Load progress from localStorage on page load
+function loadProgress() {
+    const saved = localStorage.getItem('duolingoProgress');
+    if (saved) {
+        const data = JSON.parse(saved);
+        completedCount = data.completedCount || 0;
+        nextButtonIndex = data.nextButtonIndex || 0;
+        buttonCompletions = data.buttonCompletions || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    }
+}
+
+// Save progress to localStorage
+function saveProgress() {
+    const data = {
+        completedCount,
+        nextButtonIndex,
+        buttonCompletions
+    };
+    localStorage.setItem('duolingoProgress', JSON.stringify(data));
+}
+
 function buildButtons() {
     const path = document.getElementById('snakePath');
     path.innerHTML = '';
@@ -486,6 +507,7 @@ function finishLesson() {
         nextButtonIndex++;
     }
 
+    saveProgress();
     updateProgress();
     closeQuestion();
 
@@ -521,6 +543,7 @@ function resetGame() {
     questionQueue = [];
     wrongIndices = new Set();
     streak = 0;
+    localStorage.removeItem('duolingoProgress');
     closeQuestion();
     buildButtons();
     updateProgress();
@@ -530,5 +553,6 @@ document.getElementById('questionModal').addEventListener('click', e => {
     if (e.target.id === 'questionModal') closeQuestion();
 });
 
+loadProgress();
 buildButtons();
 updateProgress();
